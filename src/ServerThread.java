@@ -13,11 +13,17 @@ public abstract class ServerThread extends Thread{
 	private ObjectInputStream inputStream;
 	private ObjectOutputStream outputStream;
 	private Server parentServer;
+	
+	//set by child classes
 	protected String fileName;
+	protected ArrayList <String> peerServers;
+	protected String twoPCCoordinator;
 	
 	public ServerThread(Server psrv, Socket skt){
 		this.socket = skt;
 		parentServer = psrv;
+		this.peerServers = psrv.getPeerServers();
+		this.twoPCCoordinator = psrv.getTwoPCCoordinator();
         try
         {
             // create output first
@@ -52,7 +58,7 @@ public abstract class ServerThread extends Thread{
                 		parentServer.setPaxosLeader(true);
 	                	for (int i = 0; i < Server.StatServers.size(); i++){
 		        			ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getLocalAddress().getHostAddress(), socket.getLocalAddress().getHostAddress() );
-			        		sendMessage(Server.StatServers.get(i), 3000, leaderMsg);
+			        		sendMessage(this.peerServers.get(i), 3000, leaderMsg);
 			        	}
 	                	reply(new ServerMessage(ServerMessage.LEADER_RESPONSE, socket.getLocalAddress().getHostAddress() ));
 
@@ -86,9 +92,8 @@ public abstract class ServerThread extends Thread{
 		        	ballotMsg.setSourceAddress(socket.getInetAddress().getHostName());
 	        	
 		        	//send to all other stat or grade servers
-
-		        	for (int i = 0; i < Server.StatServers.size(); i++){
-		        		sendMessage(Server.StatServers.get(i), 3000, ballotMsg);
+		        	for (int i = 0; i < this.peerServers.size(); i++){
+		        		sendMessage(this.peerServers.get(i), 3000, ballotMsg);
 		        	}
 		        	break;
 		   
@@ -126,13 +131,13 @@ public abstract class ServerThread extends Thread{
 		        	parentServer.setMessageHash(hash);
 
 		        	//check to see if we have gotten a majority of responses... if not, do nothing
-		        	if(ballot_msgs.size() > Server.StatServers.size()/2)
+		        	if(ballot_msgs.size() > this.peerServers.size()/2)
 		        	{
 		        		
         				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, msg.getMessage() ,socket.getLocalAddress().getHostAddress() );
         				acceptMsg.setBallotNumber(parentServer.getCurrentBallotNumber());
         				acceptMsg.setSourceAddress(msg.getSourceAddress());
-        				sendMessage(Server.stat2PCLeader, 3000, acceptMsg);
+        				sendMessage(this.twoPCCoordinator, 3000, acceptMsg);
 		        	
 		        	}
 		        	
@@ -147,15 +152,12 @@ public abstract class ServerThread extends Thread{
 		        		//reset response count for the next query
 		        		parentServer.setPaxosLeaderResponseCount(0);
 		        		String acceptVal = msg.getMessage(); //for tie breakers
-		        		for (int i = 0; i < Server.StatServers.size(); i++){
+		        		for (int i = 0; i < this.peerServers.size(); i++){
 		        			ServerMessage vote2pc = new ServerMessage(ServerMessage.TWOPHASE_VOTE_REQUEST, acceptVal);
 		        			vote2pc.setSourceAddress(msg.getSourceAddress());
-			        		sendMessage(Server.StatServers.get(i), 3000, vote2pc);
+			        		sendMessage(this.peerServers.get(i), 3000, vote2pc);
 		        		}
 		        	}
-		        	
-		        
-		        	
 		        	
 		        	 break;
 		        
@@ -168,35 +170,33 @@ public abstract class ServerThread extends Thread{
 		        case ServerMessage.TWOPHASE_VOTE_REQUEST:
 		        	//attempt to write to redo log
 		        	try {
-		        		
-		        		parentServer.appendFile("APPEND:"+msg.getMessage(), "REDO.log");
-		        		
+		        		parentServer.appendFile("APPEND:"+msg.getMessage(), "REDO.log");		        		
 		        	} catch (IOException e){
 		        		//reply no
 		        		ServerMessage replyNo = new ServerMessage(ServerMessage.TWOPHASE_VOTE_NO, msg.getMessage());
 		        		replyNo.setSourceAddress(msg.getSourceAddress());
-		        		sendMessage(Server.stat2PCLeader, 3000, replyNo);
+		        		sendMessage(this.twoPCCoordinator, 3000, replyNo);
 		        		break;
 		        	}
 		        	
 		        	//reply yes
 		        	ServerMessage replyYes = new ServerMessage(ServerMessage.TWOPHASE_VOTE_YES, msg.getMessage());
 		        	replyYes.setSourceAddress(msg.getSourceAddress());
-	        		sendMessage(Server.stat2PCLeader, 3000, replyYes);
+	        		sendMessage(this.twoPCCoordinator, 3000, replyYes);
 	        		break;
 		        	
 		        case ServerMessage.TWOPHASE_VOTE_YES:
 		        	parentServer.setPaxosLeaderResponseCount(parentServer.getPaxosLeaderResponseCount() + 1);
 		
 		        	
-		        	if (parentServer.getPaxosLeaderResponseCount() == Server.StatServers.size()){
+		        	if (parentServer.getPaxosLeaderResponseCount() == this.peerServers.size()){
 		        		//reset response count for the next query
 		        		parentServer.setPaxosLeaderResponseCount(0);
 		        		String acceptVal = msg.getMessage(); //for tie breakers
-		        		for (int i = 0; i < Server.StatServers.size(); i++){
+		        		for (int i = 0; i < this.peerServers.size(); i++){
 		        			ServerMessage commitMsg = new ServerMessage(ServerMessage.TWOPHASE_COMMIT, acceptVal);
 		        			commitMsg.setSourceAddress(msg.getSourceAddress());
-			        		sendMessage(Server.StatServers.get(i), 3000, commitMsg);
+			        		sendMessage(this.peerServers.get(i), 3000, commitMsg);
 		        		}
 		        		//tell the client we are writing
 		        		sendMessage(msg.getSourceAddress(), 3003, new ServerMessage(ServerMessage.TWOPHASE_COMMIT, "VALUE COMMITED: " + msg.getMessage() ));
@@ -206,10 +206,10 @@ public abstract class ServerThread extends Thread{
 		        	//tally yes vote
 		        case ServerMessage.TWOPHASE_VOTE_NO:
 		        	//send abort
-		        	for (int i = 0; i < Server.StatServers.size(); i++){
+		        	for (int i = 0; i < this.peerServers.size(); i++){
 	        			ServerMessage abortMsg = new ServerMessage(ServerMessage.TWOPHASE_ABORT, msg.getMessage());
 	        			abortMsg.setSourceAddress(msg.getSourceAddress());
-		        		sendMessage(Server.StatServers.get(i), 3000, abortMsg);
+		        		sendMessage(this.peerServers.get(i), 3000, abortMsg);
 	        		}
 		        	break;
 		        	

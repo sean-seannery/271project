@@ -22,6 +22,13 @@ import java.util.UUID;
  */
 public class Server {
 	
+	public static final ArrayList<String> StatServers = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu", "beavis.cs.ucsb.edu"));
+	public static final ArrayList<String> GradeServers = new ArrayList<String>(Arrays.asList("1.2.3.4",
+			"1.2.3.4",
+			"1.2.3.4"));
+	public static final String stat2PCLeader = "beavis.cs.ucsb.edu";
+	public static final String grade2PCLeader = "1.2.3.4";
+	
 	private int port;
 	private boolean isGradeServer;
 	private boolean isStatServer;
@@ -36,15 +43,12 @@ public class Server {
 	 //this contains the current value known to this server (what was last accepted)
 	private boolean isPaxosLeader;
 	private ArrayList<String> paxosLeaders;
+	private ArrayList<String> myPeerServers; 
+	private String myTwoPCCoordinator;
 	private int paxosLeaderResponseCount;
 	private ServerSocket socket;
+	
 
-	public static final ArrayList<String> StatServers = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu", "beavis.cs.ucsb.edu"));
-	public static final ArrayList<String> GradeServers = new ArrayList<String>(Arrays.asList("1.2.3.4",
-			"1.2.3.4",
-			"1.2.3.4"));
-	public static final String stat2PCLeader = "beavis.cs.ucsb.edu";
-	public static final String grade2PCLeader = "1.2.3.4";
 	
 
 	public Server() {
@@ -140,8 +144,12 @@ public class Server {
 			try{
 				if (args[i].equals("-statserver")) {
 					this.isStatServer = true;
+					this.myPeerServers = Server.StatServers;
+					this.myTwoPCCoordinator = Server.stat2PCLeader;
 				} else if (args[i].equals("-gradeserver")) {
 					this.isGradeServer = true;
+					this.myPeerServers = Server.GradeServers;
+					this.myTwoPCCoordinator = Server.grade2PCLeader;
 				} else if (args[i].equals("-port") || args[i].equals("-p")) {
 					this.port = Integer.parseInt(args[i+1]);
 					i++;
@@ -290,6 +298,22 @@ public class Server {
 
 	public synchronized void addPaxosLeaders(String newleader) {
 		this.paxosLeaders.add(newleader);
+	}
+
+	public ArrayList<String> getPeerServers() {
+		return myPeerServers;
+	}
+
+	public synchronized void setPeerServers(ArrayList<String> peerServers) {
+		this.myPeerServers = peerServers;
+	}
+
+	public String getTwoPCCoordinator() {
+		return myTwoPCCoordinator;
+	}
+
+	public void setTwoPCCoordinator(String myTwoPCCoordinator) {
+		this.myTwoPCCoordinator = myTwoPCCoordinator;
 	}
 	
 }
