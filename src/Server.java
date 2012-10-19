@@ -22,12 +22,10 @@ import java.util.UUID;
  */
 public class Server {
 	
-	public static final ArrayList<String> StatServers = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu", "beavis.cs.ucsb.edu"));
-	public static final ArrayList<String> GradeServers = new ArrayList<String>(Arrays.asList("1.2.3.4",
-			"1.2.3.4",
-			"1.2.3.4"));
-	public static final String stat2PCLeader = "beavis.cs.ucsb.edu";
-	public static final String grade2PCLeader = "1.2.3.4";
+	public static final ArrayList<String> STAT_SERVERS = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu", "beavis.cs.ucsb.edu"));
+	public static final ArrayList<String> GRADE_SERVERS = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu","beavis.cs.ucsb.edu"));
+	public static final String STAT_2PC_LEADER = "beavis.cs.ucsb.edu";
+	public static final String GRADE_2PC_LEADER = "beavis.cs.ucsb.edu";
 	
 	private int port;
 	private boolean isGradeServer;
@@ -144,12 +142,12 @@ public class Server {
 			try{
 				if (args[i].equals("-statserver")) {
 					this.isStatServer = true;
-					this.myPeerServers = Server.StatServers;
-					this.myTwoPCCoordinator = Server.stat2PCLeader;
+					this.myPeerServers = Server.STAT_SERVERS;
+					this.myTwoPCCoordinator = Server.STAT_2PC_LEADER;
 				} else if (args[i].equals("-gradeserver")) {
 					this.isGradeServer = true;
-					this.myPeerServers = Server.GradeServers;
-					this.myTwoPCCoordinator = Server.grade2PCLeader;
+					this.myPeerServers = Server.GRADE_SERVERS;
+					this.myTwoPCCoordinator = Server.GRADE_2PC_LEADER;
 				} else if (args[i].equals("-port") || args[i].equals("-p")) {
 					this.port = Integer.parseInt(args[i+1]);
 					i++;

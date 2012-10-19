@@ -56,7 +56,7 @@ public abstract class ServerThread extends Thread{
                 	
                 	if (parentServer.getPaxosLeaders().size() == 0) {
                 		parentServer.setPaxosLeader(true);
-	                	for (int i = 0; i < Server.StatServers.size(); i++){
+	                	for (int i = 0; i < this.peerServers.size(); i++){
 		        			ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getLocalAddress().getHostAddress(), socket.getLocalAddress().getHostAddress() );
 			        		sendMessage(this.peerServers.get(i), 3000, leaderMsg);
 			        	}
