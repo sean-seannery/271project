@@ -5,7 +5,7 @@ public class GradeServerThread extends ServerThread {
 
 	public GradeServerThread(Server psrv, Socket skt) {
 		super(psrv, skt);
-		this.fileName = "GRADES.txt";
+		this.fileName = psrv.getProcessId() + "GRADES.txt";
 	}
 
 }
