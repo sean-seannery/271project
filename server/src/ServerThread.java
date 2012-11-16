@@ -3,6 +3,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Hashtable;
 
 
 public abstract class ServerThread extends Thread{
@@ -13,12 +15,14 @@ public abstract class ServerThread extends Thread{
 	private int currentBallotNumber;
 	private int currentAcceptNum;  //this containts the last accepted ballot number
 	private String acceptValue; //this contains the current value known to this server (what was last accepted)
+	private Server parentServer;
 	
-	public ServerThread(Socket skt){
+	public ServerThread(Server psrv, Socket skt){
 		this.socket = skt;
 		this.acceptValue = null;
 		currentBallotNumber = 0;
 		currentAcceptNum = 0;
+		parentServer = psrv;
         try
         {
             // create output first
@@ -78,6 +82,53 @@ public abstract class ServerThread extends Thread{
 		        	
 		        case ServerMessage.PAXOS_ACK:
 		        	//do something
+		        	proposedBallot = Integer.parseInt(msg.getMessage().split(",")[0]);
+		        	Hashtable<Integer, ArrayList> hash = parentServer.getMessageHash();
+		        	ArrayList temp = hash.get(proposedBallot);
+		            temp.add(msg);
+		        	hash.put(proposedBallot, temp);
+		        	parentServer.setMessageHash(hash);
+
+		        	if(temp.size() > Server.StatServers.size()/2)
+		        	{
+		        		boolean all_null = true;
+		        		int highest_accept_num = -1;
+		        		String highest_accept_val = null;
+		        		for (int i = 0; i < temp.size(); i++){
+		        			ServerMessage temp_msg = (ServerMessage)temp.get(i);
+		        	     	int proposedacceptnum = Integer.parseInt(temp_msg.getMessage().split(",")[1]);
+		        	     	String proposedVal = temp_msg.getMessage().split(",")[2];
+		        			
+		        	     	if (proposedacceptnum > highest_accept_num ) {
+		        	     		
+		        	     		highest_accept_num = proposedacceptnum;
+		        	     		highest_accept_val = proposedVal;
+		        	     	}
+		        	     	
+				        	if (!proposedVal.equals(null)){
+				        		all_null = false;
+				        	}
+		        		}
+		        		
+		        		if (all_null) {
+		        			//write line of grades / stats into file
+		        			
+		        			for (int i = 0; i < Server.StatServers.size(); i++){
+		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, currentBallotNumber +","+ this.acceptValue ,socket.getLocalAddress().getHostAddress() );
+				        		sendMessage(Server.StatServers.get(i), 3000, acceptMsg);
+				        	}
+				        	
+		        			
+		        		} else {
+		        			for (int i = 0; i < Server.StatServers.size(); i++){
+		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, currentBallotNumber +","+ highest_accept_val ,socket.getLocalAddress().getHostAddress() );
+				        		sendMessage(Server.StatServers.get(i), 3000, acceptMsg);
+				        	}
+		        		}
+		        	}
+		        	
+		        	break;
+		        	
 		        case ServerMessage.PAXOS_DECIDE:
 		        	//do something
 		        case ServerMessage.PAXOS_ACCEPT:

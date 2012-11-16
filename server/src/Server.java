@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -26,7 +27,17 @@ public class Server {
 	private int currentBallotNumber;
 	private int processId;
 	
+	private Hashtable messageHash;
 	
+	
+	public Hashtable getMessageHash() {
+		return messageHash;
+	}
+
+	public void setMessageHash(Hashtable msgh) {
+		this.messageHash = msgh;
+	}
+
 	public static final ArrayList<String> StatServers = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu"));
 	public static final ArrayList<String> GradeServers = new ArrayList<String>(Arrays.asList("1.2.3.4",
 			"1.2.3.4",
@@ -41,7 +52,7 @@ public class Server {
 		isGradeServer = false;
 		isStatServer = false;
 		isPaxosLeader = false;
-		
+		messageHash = new Hashtable<Integer,ArrayList<ServerMessage> >();
 	}
 	
 	/**
@@ -74,10 +85,10 @@ public class Server {
 					
 				ServerThread t;
 				if (this.isGradeServer) {
-					t = new GradeServerThread(connected_socket);
+					t = new GradeServerThread(this, connected_socket);
 					t.run();
 				} else if (this.isStatServer) {
-					t = new StatServerThread(connected_socket);
+					t = new StatServerThread(this, connected_socket);
 					t.run();
 				}
 			

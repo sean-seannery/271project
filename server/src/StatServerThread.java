@@ -3,8 +3,8 @@ import java.net.Socket;
 
 public class StatServerThread extends ServerThread {
 
-	public StatServerThread(Socket skt) {
-		super(skt);
+	public StatServerThread(Server psrv, Socket skt) {
+		super(psrv, skt);
 	}
 
 }
