@@ -54,6 +54,9 @@ public abstract class ServerThread extends Thread{
 		        	//send prepare ballot
 		        	currentBallotNumber++;
 		        	ServerMessage ballot = new ServerMessage(ServerMessage.PAXOS_PREPARE, currentBallotNumber + "," + this.getId(), socket.getLocalAddress().getHostAddress() );
+		        	
+		        	System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
+
 		        	//send to other stat or grade servers
 		        	for (int i = 0; i < Server.StatServers.size(); i++){
 		        		sendMessage(Server.StatServers.get(i), 3000, ballot);
@@ -64,11 +67,12 @@ public abstract class ServerThread extends Thread{
 		        	//do something
 		        	//contents of the message are ballotnum,processesid.
 		        	int proposedBallot = Integer.parseInt(msg.getMessage().split(",")[0]);
+		        	
 		        	if (proposedBallot >= currentBallotNumber){
 		        		this.currentBallotNumber = proposedBallot;
 		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, currentBallotNumber + ","+ currentAcceptNum + "," + this.acceptValue ,socket.getLocalAddress().getHostAddress() );
 		        		sendMessage(msg.getSourceAddress(), 3000, ackMessage);
-		        		
+		        		System.out.println(msg.getSourceAddress());
 		        	}
 		        	break;
 		        	

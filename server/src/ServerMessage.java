@@ -71,6 +71,6 @@ public class ServerMessage implements Serializable {
 	
 	public String toString(){
 		
-		return "ServerMessage{" + this.getType() + ": " + this.getMessage() + "}";
+		return "ServerMessage{" + getSourceAddress() + ":" + this.getType() + ": " + this.getMessage() + "}";
 	}
 }
