@@ -4,6 +4,7 @@
 
 import java.io.*;
 import java.net.*;
+import java.util.Scanner;
 
 public class Client {
   public static void main(String[] args) {
@@ -18,6 +19,14 @@ public class Client {
       if (!(command.equals("APPEND") || command.equals("READ"))) {
         System.out.println("command should be 'APPEND' or 'READ'");
         System.exit(1);
+      }
+      int[] grades = new int[10];
+      double[] stats = new double[3];
+      
+      if(command.equals("APPEND")) {
+        System.out.println("Reading in numbers");
+        num(grades);
+        calc(grades, stats);
       }
     try {
       InetAddress address = InetAddress.getByName(host);
@@ -39,5 +48,27 @@ public class Client {
     catch (Exception e) {    // report any exceptions
       System.err.println(e);
     }
+  }
+  public static void num(int g[]) {
+    Scanner input = new Scanner( System.in ); 
+    for(int i = 0; i < 10; i++) {
+        g[i] = input.nextInt();
+    }
+  }
+  public static void calc(int g[], double s[]) {
+    int min = g[0];
+    int max = g[0];
+    double sum = g[0];
+    Scanner input = new Scanner( System.in ); 
+    for(int i = 1; i < 10; i++) {
+        if(g[i] < min)
+            min = g[i];
+        if(g[i] > max)
+            max = g[i];
+        sum += g[i];
+    }
+    s[0] = min;
+    s[1] = max;
+    s[2] = sum/10;
   }
 }
