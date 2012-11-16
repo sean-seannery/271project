@@ -58,6 +58,7 @@ public abstract class ServerThread extends Thread{
 		        	for (int i = 0; i < Server.StatServers.size(); i++){
 		        		sendMessage(Server.StatServers.get(i), 3000, ballot);
 		        	}
+		        	break;
 		   
 		        case ServerMessage.PAXOS_PREPARE:
 		        	//do something
@@ -69,6 +70,7 @@ public abstract class ServerThread extends Thread{
 		        		sendMessage(msg.getSourceAddress(), 3000, ackMessage);
 		        		
 		        	}
+		        	break;
 		        	
 		        case ServerMessage.PAXOS_ACK:
 		        	//do something
