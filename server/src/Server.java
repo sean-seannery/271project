@@ -6,6 +6,11 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * @author sam
@@ -16,11 +21,27 @@ public class Server {
 	private int port;
 	private boolean isGradeServer;
 	private boolean isStatServer;
+	
+	private boolean isPaxosLeader;
+	private int currentBallotNumber;
+	private int processId;
+	
+	
+	public static final ArrayList<String> StatServers = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu"));
+	public static final ArrayList<String> GradeServers = new ArrayList<String>(Arrays.asList("1.2.3.4",
+			"1.2.3.4",
+			"1.2.3.4"));
+	
+	Queue<ServerMessage> messageQueue;
 
 	public Server() {
+		currentBallotNumber = 0;
+		messageQueue = new LinkedList<ServerMessage>();
 		port = 3000;
 		isGradeServer = false;
 		isStatServer = false;
+		isPaxosLeader = false;
+		
 	}
 	
 	/**
@@ -41,12 +62,12 @@ public class Server {
 	    try {
 			socket = new ServerSocket(this.port);
 		
-		    
+			System.out.println("Server listening on port " + port + "....");
+			
 			while (true) {
 			
 				Socket connected_socket;
-				System.out.println("Server listening on port " + port + "....");
-			
+				
 			
 				connected_socket = socket.accept();
 			
@@ -54,8 +75,10 @@ public class Server {
 				ServerThread t;
 				if (this.isGradeServer) {
 					t = new GradeServerThread(connected_socket);
+					t.run();
 				} else if (this.isStatServer) {
 					t = new StatServerThread(connected_socket);
+					t.run();
 				}
 			
 				
@@ -73,7 +96,7 @@ public class Server {
 	 */
 	private void processArgs(String[] args){
 		
-		String usage = "\nUsage: \n java server -statfile|-gradefile [-p portnumber] [-help] \n \ncom" +
+		String usage = "\nUsage: \n java server -statserver|-gradeserver [-p portnumber] [-help] \n \n" +
 					   "-statserver         If this server will host STATS.txt then you should use this option \n" +
 					   "                    to indicate that.  Either -statfile or -gradefile is required \n \n" +
 					   "-gradeserver        If this server will host GRADES.txt then you should use this option \n" +
