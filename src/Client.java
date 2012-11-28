@@ -50,6 +50,7 @@ public class Client {
       
       // open socket, then input and output streams to it
       Socket socket = new Socket(address,port);
+
       ObjectInputStream from_server = new ObjectInputStream(socket.getInputStream());
       ObjectOutputStream to_server = new ObjectOutputStream(socket.getOutputStream());
       System.out.println("Connected");

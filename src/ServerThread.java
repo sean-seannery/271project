@@ -11,6 +11,7 @@ public abstract class ServerThread extends Thread{
 
 	private Socket socket;
 	private ObjectInputStream inputStream;
+	private ObjectOutputStream outputStream;
 	private int currentAcceptNum;  //this containts the last accepted ballot number
 	private String acceptValue; //this contains the current value known to this server (what was last accepted)
 	private Server parentServer;
@@ -23,6 +24,7 @@ public abstract class ServerThread extends Thread{
         try
         {
             // create output first
+        	outputStream = new ObjectOutputStream(socket.getOutputStream()); //needs this or it wont work
             inputStream  = new ObjectInputStream(socket.getInputStream());
         }
         catch (IOException e) {
@@ -42,7 +44,6 @@ public abstract class ServerThread extends Thread{
 		ServerMessage msg;
 		
 		try {
-
             msg = (ServerMessage) inputStream.readObject();
             System.out.println("RECIEVED:" + msg.getMessage());
             
