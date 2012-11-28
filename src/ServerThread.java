@@ -60,7 +60,7 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        	//send to all other stat or grade servers
 
 		        	for (int i = 0; i < Server.StatServers.size(); i++){
-		        		System.out.println("SENDING: PAXOS_PREPARE to " + Server.StatServers.get(i) + " MSG:" + ballot);
+		        		System.out.println("SENDING: PAXOS_PREPARE to " + Server.StatServers.get(i));
 		        		sendMessage(Server.StatServers.get(i), 3000, ballot);
 		        	}
 		        	break;
@@ -76,7 +76,7 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        		parentServer.setCurrentBallotNumber(proposedBallot);
 		        		//send the ack message with the current ballot, the last accepted ballot, the current value.
 		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, parentServer.getCurrentBallotNumber() + ","+ currentAcceptNum + "," + this.acceptValue, socket.getInetAddress().getHostName() );
-		        		System.out.println("SENDING: PAXOS_ACK to " + socket.getInetAddress().getHostName() + " MSG:" + ackMessage);
+		        		System.out.println("SENDING: PAXOS_ACK to " + socket.getInetAddress().getHostName());
 		        		sendMessage(socket.getInetAddress().getHostName(), 3000, ackMessage);
 		        	
 		        	}
@@ -88,6 +88,9 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        	Hashtable<Integer,ArrayList<ServerMessage> > hash = parentServer.getMessageHash();
 		        	ArrayList<ServerMessage> ballot_msgs = hash.get(proposedBallot);
 		            //add the incoming message to a collection of responses for this ballot
+		        	if (ballot_msgs == null){
+		        		ballot_msgs = new ArrayList<ServerMessage>();
+		        	}
 		            ballot_msgs.add(msg);
 		        	hash.put(proposedBallot, ballot_msgs);
 		        	parentServer.setMessageHash(hash);
@@ -123,7 +126,7 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        			for (int i = 0; i < Server.StatServers.size(); i++){
 		        								        		
 		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, parentServer.getCurrentBallotNumber() +","+ this.acceptValue ,socket.getLocalAddress().getHostAddress() );
-		        				System.out.println("SENDING: PAXOS_ACCEPT to " + Server.StatServers.get(i) + " MSG:" + acceptMsg);
+		        				System.out.println("SENDING: PAXOS_ACCEPT to " + Server.StatServers.get(i) );
 		        				sendMessage(Server.StatServers.get(i), 3000, acceptMsg);
 				        	}
 				        	
@@ -131,7 +134,7 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        		} else {
 		        			for (int i = 0; i < Server.StatServers.size(); i++){
 		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT,  parentServer.getCurrentBallotNumber() +","+ highest_accept_val ,socket.getLocalAddress().getHostAddress() );
-		        				System.out.println("SENDING: PAXOS_ACCEPT to " + Server.StatServers.get(i) + " MSG:" + acceptMsg);
+		        				System.out.println("SENDING: PAXOS_ACCEPT to " + Server.StatServers.get(i) );
 		        				sendMessage(Server.StatServers.get(i), 3000, acceptMsg);
 				        	}
 		        		}
