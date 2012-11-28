@@ -31,6 +31,11 @@ public class ServerMessage implements Serializable {
 		setSourceAddress(src);
 	}
 	
+	public ServerMessage(int newType, String newMsg){
+		setMessage(newMsg);
+		setType(newType);
+	}
+	
 	public ServerMessage(int newType){
 		setMessage(null);
 		setType(newType);

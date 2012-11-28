@@ -3,15 +3,15 @@
  */
 
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
  * @author sam
@@ -22,36 +22,21 @@ public class Server {
 	private int port;
 	private boolean isGradeServer;
 	private boolean isStatServer;
-	
-	private boolean isPaxosLeader;
-	private int currentBallotNumber;
-	private int processId;
-	
-	private Hashtable messageHash;
-	
-	
-	public Hashtable getMessageHash() {
-		return messageHash;
-	}
 
-	public void setMessageHash(Hashtable msgh) {
-		this.messageHash = msgh;
-	}
+	private int currentBallotNumber;	
+	private Hashtable<Integer,ArrayList<ServerMessage> > messageHash;
 
 	public static final ArrayList<String> StatServers = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu"));
 	public static final ArrayList<String> GradeServers = new ArrayList<String>(Arrays.asList("1.2.3.4",
 			"1.2.3.4",
 			"1.2.3.4"));
 	
-	Queue<ServerMessage> messageQueue;
 
 	public Server() {
 		currentBallotNumber = 0;
-		messageQueue = new LinkedList<ServerMessage>();
 		port = 3000;
 		isGradeServer = false;
 		isStatServer = false;
-		isPaxosLeader = false;
 		messageHash = new Hashtable<Integer,ArrayList<ServerMessage> >();
 	}
 	
@@ -67,7 +52,7 @@ public class Server {
 	
 	
 	public void start() {
-		System.out.println("Starting Server...");
+		System.out.println("Starting Server... ServerID=" + getProcessId());
 		ServerSocket socket;
 		
 	    try {
@@ -149,6 +134,58 @@ public class Server {
 			System.exit(1);
 		}
 		
+	}
+	
+	
+	public synchronized void appendFile(String data) {
+		String filename = "TEST.txt";
+		if (isStatServer){
+			filename = "STATS.txt";
+		} else if (isGradeServer) {
+			filename = "GRADES.txt";
+		}
+		
+		try{
+		
+			File outfile = new File(filename);
+ 
+    		//if file doesnt exists, then create it
+    		if(!outfile.exists()){
+    			outfile.createNewFile();
+    		}
+ 
+    	    BufferedWriter buffer = new BufferedWriter( new FileWriter(outfile.getName(),true) );
+    	    buffer.write(data);
+            buffer.close(); 
+ 
+	        System.out.println("Wrote to file");
+ 
+    	}catch(IOException e){
+    		System.out.println("Error Writing Local File:");
+    		e.printStackTrace();
+    	}
+	}
+	
+	
+	public Hashtable<Integer,ArrayList<ServerMessage> > getMessageHash() {
+		return messageHash;
+	}
+
+	public synchronized void setMessageHash(Hashtable<Integer,ArrayList<ServerMessage> > msgh) {
+		this.messageHash = msgh;
+	}
+	
+	
+	public int getCurrentBallotNumber() {
+		return currentBallotNumber;
+	}
+
+	public synchronized void setCurrentBallotNumber(int currentBallotNumber) {
+		this.currentBallotNumber = currentBallotNumber;		   
+	}
+	
+	public long getProcessId() {
+		return Thread.currentThread().getId();	
 	}
 	
 }

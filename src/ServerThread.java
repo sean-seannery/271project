@@ -11,8 +11,6 @@ public abstract class ServerThread extends Thread{
 
 	private Socket socket;
 	private ObjectInputStream inputStream;
-	private ObjectOutputStream outputStream;
-	private int currentBallotNumber;
 	private int currentAcceptNum;  //this containts the last accepted ballot number
 	private String acceptValue; //this contains the current value known to this server (what was last accepted)
 	private Server parentServer;
@@ -20,15 +18,12 @@ public abstract class ServerThread extends Thread{
 	public ServerThread(Server psrv, Socket skt){
 		this.socket = skt;
 		this.acceptValue = null;
-		currentBallotNumber = 0;
 		currentAcceptNum = 0;
 		parentServer = psrv;
         try
         {
             // create output first
-        	outputStream = new ObjectOutputStream(socket.getOutputStream());
             inputStream  = new ObjectInputStream(socket.getInputStream());
-
         }
         catch (IOException e) {
             System.out.println("Error Creating Streams: " + e);
@@ -55,47 +50,53 @@ public abstract class ServerThread extends Thread{
 		        case ServerMessage.CLIENT_READ:
 		        	//read the file
 		        case ServerMessage.CLIENT_APPEND:
-		        	//send prepare ballot
-		        	currentBallotNumber++;
-		        	ServerMessage ballot = new ServerMessage(ServerMessage.PAXOS_PREPARE, currentBallotNumber + "," + this.getId(), socket.getLocalAddress().getHostAddress() );
+		        	//create a new ballot by incrementing current ballot by 1
+		        	parentServer.setCurrentBallotNumber(parentServer.getCurrentBallotNumber()+1);
+		        	ServerMessage ballot = new ServerMessage(ServerMessage.PAXOS_PREPARE, parentServer.getCurrentBallotNumber() + "," + parentServer.getProcessId(), socket.getLocalAddress().getHostAddress() );
 		        	
-		        	System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
-
-		        	//send to other stat or grade servers
+System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
+	        	
+		        	//send to all other stat or grade servers
 		        	for (int i = 0; i < Server.StatServers.size(); i++){
 		        		sendMessage(Server.StatServers.get(i), 3000, ballot);
 		        	}
 		        	break;
 		   
 		        case ServerMessage.PAXOS_PREPARE:
-		        	//do something
-		        	//contents of the message are ballotnum,processesid.
+		 
+		        	//contents of the incoming prepare message are ballotnum,processesid.
 		        	int proposedBallot = Integer.parseInt(msg.getMessage().split(",")[0]);
 		        	
-		        	if (proposedBallot >= currentBallotNumber){
-		        		this.currentBallotNumber = proposedBallot;
-		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, currentBallotNumber + ","+ currentAcceptNum + "," + this.acceptValue ,socket.getLocalAddress().getHostAddress() );
-		        		sendMessage(msg.getSourceAddress(), 3000, ackMessage);
+		        	//if the incoming ballot is newer than my ballot, update my ballot and send an ack, otherwise the incoming
+		        	//ballot is old and we can ignore it
+		        	if (proposedBallot >= parentServer.getCurrentBallotNumber()){
+		        		parentServer.setCurrentBallotNumber(proposedBallot);
+		        		//send the ack message with the current ballot, the last accepted ballot, the current value.
+		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, parentServer.getCurrentBallotNumber() + ","+ currentAcceptNum + "," + this.acceptValue );
+		        		sendReply( ackMessage);
 		        		System.out.println(msg.getSourceAddress());
 		        	}
 		        	break;
 		        	
 		        case ServerMessage.PAXOS_ACK:
-		        	//do something
+		        	//contents of the incoming ack message are current ballot, the last accepted ballot, the current value
 		        	proposedBallot = Integer.parseInt(msg.getMessage().split(",")[0]);
-		        	Hashtable<Integer, ArrayList> hash = parentServer.getMessageHash();
-		        	ArrayList temp = hash.get(proposedBallot);
-		            temp.add(msg);
-		        	hash.put(proposedBallot, temp);
+		        	Hashtable<Integer,ArrayList<ServerMessage> > hash = parentServer.getMessageHash();
+		        	ArrayList<ServerMessage> ballot_msgs = hash.get(proposedBallot);
+		            //add the incoming message to a collection of responses for this ballot
+		            ballot_msgs.add(msg);
+		        	hash.put(proposedBallot, ballot_msgs);
 		        	parentServer.setMessageHash(hash);
 
-		        	if(temp.size() > Server.StatServers.size()/2)
+		        	//check to see if we have gotten a majority of responses... if not, do nothing
+		        	if(ballot_msgs.size() > Server.StatServers.size()/2)
 		        	{
 		        		boolean all_null = true;
 		        		int highest_accept_num = -1;
 		        		String highest_accept_val = null;
-		        		for (int i = 0; i < temp.size(); i++){
-		        			ServerMessage temp_msg = (ServerMessage)temp.get(i);
+		        		//if we have, loop through the acks to see if we have an initial value.
+		        		for (int i = 0; i < ballot_msgs.size(); i++){
+		        			ServerMessage temp_msg = (ServerMessage)ballot_msgs.get(i);
 		        	     	int proposedacceptnum = Integer.parseInt(temp_msg.getMessage().split(",")[1]);
 		        	     	String proposedVal = temp_msg.getMessage().split(",")[2];
 		        			
@@ -112,16 +113,18 @@ public abstract class ServerThread extends Thread{
 		        		
 		        		if (all_null) {
 		        			//write line of grades / stats into file
+		        			parentServer.appendFile("TEST WRITING SHIT");
 		        			
+		        			//tell all other servers to accept my values
 		        			for (int i = 0; i < Server.StatServers.size(); i++){
-		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, currentBallotNumber +","+ this.acceptValue ,socket.getLocalAddress().getHostAddress() );
+		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, parentServer.getCurrentBallotNumber() +","+ this.acceptValue ,socket.getLocalAddress().getHostAddress() );
 				        		sendMessage(Server.StatServers.get(i), 3000, acceptMsg);
 				        	}
 				        	
 		        			
 		        		} else {
 		        			for (int i = 0; i < Server.StatServers.size(); i++){
-		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, currentBallotNumber +","+ highest_accept_val ,socket.getLocalAddress().getHostAddress() );
+		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT,  parentServer.getCurrentBallotNumber() +","+ highest_accept_val ,socket.getLocalAddress().getHostAddress() );
 				        		sendMessage(Server.StatServers.get(i), 3000, acceptMsg);
 				        	}
 		        		}
@@ -174,6 +177,22 @@ public abstract class ServerThread extends Thread{
 		      // send command to server, then read and print lines until
 		      // the server closes the connection
 		      System.out.print("Sending Message to Server...");
+		      to_server.writeObject(msg); to_server.flush();
+		      System.out.println("Sent: " + msg);
+		 } catch (IOException e){
+			 System.out.println("Server failed sending message:" + e.getMessage());
+		 }
+	}
+	
+	private void sendReply(ServerMessage msg){
+		
+		 try {
+
+		      ObjectOutputStream to_server = new ObjectOutputStream(socket.getOutputStream());
+		      
+		      // send command to server, then read and print lines until
+		      // the server closes the connection
+		      System.out.print("Replying Message to Server...");
 		      to_server.writeObject(msg); to_server.flush();
 		      System.out.println("Sent: " + msg);
 		 } catch (IOException e){
