@@ -75,10 +75,10 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        	if (proposedBallot > parentServer.getCurrentBallotNumber() || (proposedBallot == parentServer.getCurrentBallotNumber() && proposedprocessID > parentServer.getProcessId()) ){
 		        		parentServer.setCurrentBallotNumber(proposedBallot);
 		        		//send the ack message with the current ballot, the last accepted ballot, the current value.
-		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, parentServer.getCurrentBallotNumber() + ","+ currentAcceptNum + "," + this.acceptValue );
+		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, parentServer.getCurrentBallotNumber() + ","+ currentAcceptNum + "," + this.acceptValue, socket.getInetAddress().getHostName() );
 		        		System.out.println("SENDING: PAXOS_ACK to " + socket.getInetAddress().getHostName() + " MSG:" + ackMessage);
-		        		sendReply( ackMessage);
-		        		System.out.println(msg.getSourceAddress());
+		        		sendMessage(socket.getInetAddress().getHostName(), 3000, ackMessage);
+		        	
 		        	}
 		        	break;
 		        	
@@ -191,20 +191,5 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		 }
 	}
 	
-	private void sendReply(ServerMessage msg){
-		
-		 try {
-
-		      ObjectOutputStream to_server = new ObjectOutputStream(socket.getOutputStream());
-		      
-		      // send command to server, then read and print lines until
-		      // the server closes the connection
-		      System.out.print("Replying Message to Server...");
-		      to_server.writeObject(msg); to_server.flush();
-		      System.out.println("Sent: " + msg);
-		 } catch (IOException e){
-			 System.out.println("Server failed sending message:" + e.getMessage());
-		 }
-	}
 	
 }
