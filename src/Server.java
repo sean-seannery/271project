@@ -61,7 +61,7 @@ public class Server {
 			socket = new ServerSocket(this.port);
 		
 			System.out.println("Server listening on port " + port + "....");
-			
+			System.out.println("=============================================");
 			while (true) {
 			
 				Socket connected_socket;
