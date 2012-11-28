@@ -58,6 +58,7 @@ public class Client {
       // send command to server, then read and print lines until
       // the server closes the connection
       System.out.print("Sending Message to Server...");
+      msg.setSourceAddress("CLIENT");
       to_server.writeObject(msg); to_server.flush();
       System.out.println("Sent: " + msg);
       ServerMessage line;

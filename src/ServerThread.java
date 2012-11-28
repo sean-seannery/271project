@@ -113,7 +113,7 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        	     		highest_accept_val = proposedVal;
 		        	     	}
 		        	     	
-				        	if (!proposedVal.equals(null)){
+				        	if (proposedVal != null){
 				        		all_null = false;
 				        	}
 		        		}
