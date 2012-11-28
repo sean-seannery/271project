@@ -66,10 +66,10 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		 
 		        	//contents of the incoming prepare message are ballotnum,processesid.
 		        	int proposedBallot = Integer.parseInt(msg.getMessage().split(",")[0]);
-		        	
+		        	int proposedprocessID = Integer.parseInt(msg.getMessage().split(",")[1]); //for tie breakers
 		        	//if the incoming ballot is newer than my ballot, update my ballot and send an ack, otherwise the incoming
 		        	//ballot is old and we can ignore it
-		        	if (proposedBallot >= parentServer.getCurrentBallotNumber()){
+		        	if (proposedBallot > parentServer.getCurrentBallotNumber() || (proposedBallot == parentServer.getCurrentBallotNumber() && proposedprocessID > parentServer.getProcessId()) ){
 		        		parentServer.setCurrentBallotNumber(proposedBallot);
 		        		//send the ack message with the current ballot, the last accepted ballot, the current value.
 		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, parentServer.getCurrentBallotNumber() + ","+ currentAcceptNum + "," + this.acceptValue );

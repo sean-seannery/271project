@@ -3,18 +3,16 @@
  */
 
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.UUID;
 
 /**
  * @author sam
@@ -25,7 +23,7 @@ public class Server {
 	private int port;
 	private boolean isGradeServer;
 	private boolean isStatServer;
-	private String serverIP;
+	private int processID;
 
 	private int currentBallotNumber;	
 	private Hashtable<Integer,ArrayList<ServerMessage> > messageHash;
@@ -37,7 +35,7 @@ public class Server {
 	
 
 	public Server() {
-		serverIP = null;
+		processID = UUID.randomUUID().hashCode();
 		currentBallotNumber = 0;
 		port = 3000;
 		isGradeServer = false;
@@ -49,7 +47,6 @@ public class Server {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		Server myServer = new Server();
 		myServer.processArgs(args);
 		myServer.start();
@@ -68,11 +65,9 @@ public class Server {
 			while (true) {
 			
 				Socket connected_socket;
-				
-			
+							
 				connected_socket = socket.accept();
-			
-					
+								
 				ServerThread t;
 				if (this.isGradeServer) {
 					t = new GradeServerThread(this, connected_socket);
@@ -81,11 +76,9 @@ public class Server {
 					t = new StatServerThread(this, connected_socket);
 					t.run();
 				}
-			
-				
+							
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -189,21 +182,7 @@ public class Server {
 		this.currentBallotNumber = currentBallotNumber;		   
 	}
 	
-	public String getProcessId() {
-		if (serverIP == null) {
-		
-			try {
-				URL whatismyip = new URL("http://automation.whatismyip.com/n09230945.asp");
-				BufferedReader in = new BufferedReader(new InputStreamReader(
-				                whatismyip.openStream()));
-	
-				serverIP = in.readLine(); //you get the IP as a String
-			} catch(Exception e) {
-				e.printStackTrace();
-				serverIP = null;
-			}
-		}
-		return serverIP;
+	public int getProcessId() {
+		return processID;
 	}
-	
 }
