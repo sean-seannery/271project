@@ -35,7 +35,7 @@ public class Server {
 	private ArrayList<String> paxosLeaders;
 	private int paxosLeaderResponseCount;
 
-	public static final ArrayList<String> StatServers = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu"));
+	public static final ArrayList<String> StatServers = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu", "beavis.cs.ucsb.edu"));
 	public static final ArrayList<String> GradeServers = new ArrayList<String>(Arrays.asList("1.2.3.4",
 			"1.2.3.4",
 			"1.2.3.4"));
