@@ -53,7 +53,6 @@ public abstract class ServerThread extends Thread{
 		        		parentServer.setPaxosLeader(true);
 		        		for (int i = 0; i < Server.StatServers.size(); i++){
 		        			ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getLocalAddress().getHostAddress(), socket.getLocalAddress().getHostAddress() );
-			        		System.out.println("SENDING: ADD_LEADER to " + Server.StatServers.get(i));
 			        		sendMessage(Server.StatServers.get(i), 3000, leaderMsg);
 			        	}
 		        		//send
@@ -67,7 +66,6 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        	//send to all other stat or grade servers
 
 		        	for (int i = 0; i < Server.StatServers.size(); i++){
-		        		System.out.println("SENDING: PAXOS_PREPARE to " + Server.StatServers.get(i));
 		        		sendMessage(Server.StatServers.get(i), 3000, ballot);
 		        	}
 		        	break;
@@ -79,11 +77,12 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        	int proposedprocessID = Integer.parseInt(msg.getMessage().split(",")[1]); //for tie breakers
 		        	//if the incoming ballot is newer than my ballot, update my ballot and send an ack, otherwise the incoming
 		        	//ballot is old and we can ignore it
-		        	if (proposedBallot > parentServer.getCurrentBallotNumber() || (proposedBallot == parentServer.getCurrentBallotNumber() && proposedprocessID > parentServer.getProcessId()) ){
+		        	//or if the ballots are the same, process id will be the tie breaker. 
+		        	//if the prepare is sent to myself
+		        	if (proposedBallot > parentServer.getCurrentBallotNumber() || (proposedBallot == parentServer.getCurrentBallotNumber() && proposedprocessID >= parentServer.getProcessId()) ){
 		        		parentServer.setCurrentBallotNumber(proposedBallot);
 		        		//send the ack message with the current ballot, the last accepted ballot, the current value.
 		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, parentServer.getCurrentBallotNumber() + ","+ parentServer.getCurrentAcceptNum() + "," + parentServer.getAcceptValue(), socket.getInetAddress().getHostName() );
-		        		System.out.println("SENDING: PAXOS_ACK to " + socket.getInetAddress().getHostName());
 		        		sendMessage(socket.getInetAddress().getHostName(), 3000, ackMessage);
 		        	
 		        	}
@@ -107,7 +106,6 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        	{
 
         				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, parentServer.getCurrentBallotNumber() +","+ parentServer.getAcceptValue() ,socket.getLocalAddress().getHostAddress() );
-        				System.out.println("SENDING: PAXOS_ACCEPT to " + Server.stat2PCLeader );
         				sendMessage(Server.stat2PCLeader, 3000, acceptMsg);
 		        	
 		        	}
@@ -124,7 +122,6 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        		String acceptVal = msg.getMessage().split(",")[1]; //for tie breakers
 		        		for (int i = 0; i < Server.StatServers.size(); i++){
 		        			ServerMessage vote2pc = new ServerMessage(ServerMessage.TWOPHASE_VOTE_REQUEST, acceptVal);
-			        		System.out.println("SENDING: TWOPHASE_VOTE_REQUEST to " + Server.StatServers.get(i));
 			        		sendMessage(Server.StatServers.get(i), 3000, vote2pc);
 		        		}
 		        	}
@@ -166,22 +163,24 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 	
 	private void sendMessage(String host, int port, ServerMessage msg){
 		
+		System.out.println("SENDING " + msg + " to Server:" + host + "...");
+		
 		 try {
 		      InetAddress address = InetAddress.getByName(host);
-		      System.out.print("Connecting to Server...");
+		      System.out.print("  Connecting to Server:"+host+"...");
 		      
 		      // open socket, then input and output streams to it
 		      Socket socket = new Socket(address,port);
 		      ObjectOutputStream to_server = new ObjectOutputStream(socket.getOutputStream());
-		      System.out.println("Connected");
+		      System.out.print("Connected");
 		      
 		      // send command to server, then read and print lines until
 		      // the server closes the connection
-		      System.out.print("Sending Message to Server...");
+		      
 		      to_server.writeObject(msg); to_server.flush();
-		      System.out.println("Sent: " + msg);
+		      System.out.println("....SENT");
 		 } catch (IOException e){
-			 System.out.println("Server failed sending message:" + e.getMessage());
+			 System.out.println("  ERROR: Server failed sending message:" + e.getMessage());
 		 }
 	}
 	

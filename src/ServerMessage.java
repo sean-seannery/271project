@@ -1,5 +1,7 @@
 import java.io.Serializable;
 
+import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
+
 
 public class ServerMessage implements Serializable {
 
@@ -48,6 +50,28 @@ public class ServerMessage implements Serializable {
 		setSourceAddress(null);
 	}
 	
+	public String getTypeName() {
+		
+		Hashtable typemapping = new Hashtable();
+		typemapping.put(0, "PAXOS_PREPARE");
+		typemapping.put(1, "PAXOS_ACK");
+		typemapping.put(2, "PAXOS_ACCEPT");
+		typemapping.put(3, "PAXOS_ADD_LEADER");
+		typemapping.put(10, "TWOPHASE_VOTE_REQUEST");
+		typemapping.put(11, "TWOPHASE_VOTE_YES");
+		typemapping.put(12, "TWOPHASE_VOTE_NO");
+		typemapping.put(13, "TWOPHASE_COMMIT");
+		typemapping.put(14, "TWOPHASE_ABORT");
+		typemapping.put(20, "CLIENT_READ");
+		typemapping.put(21, "CLIENT_APPEND");
+	
+		if (this.type == -1) {
+			return null;
+		}
+		
+		return (String) typemapping.get(this.type);
+
+	}
 	
 	//accessors and mutators
 	public int getType() {
@@ -76,6 +100,6 @@ public class ServerMessage implements Serializable {
 	
 	public String toString(){
 		
-		return "ServerMessage{source:" + getSourceAddress() + " type:" + this.getType() + " msg:" + this.getMessage() + "}";
+		return "ServerMessage{source:" + getSourceAddress() + " type:" + this.getTypeName() + " msg:" + this.getMessage() + "}";
 	}
 }

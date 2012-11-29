@@ -3,10 +3,12 @@
  */
 
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -24,6 +26,7 @@ public class Server {
 	private boolean isGradeServer;
 	private boolean isStatServer;
 	private int processID;
+
 
 	//these variables need to be synchronized
 	private int currentBallotNumber;	
@@ -75,7 +78,14 @@ public class Server {
 		
 			System.out.println("Server listening on port " + port + "....");
 			System.out.println("=============================================");
-			while (true) {
+			
+			
+
+	        // Create a buffered reader to stdin
+			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+			
+			while (reader.readLine() != null) {
 			
 				Socket connected_socket;
 							
@@ -91,6 +101,12 @@ public class Server {
 				}
 							
 			}
+			
+			System.out.println("=============================================");
+			System.out.println(" \n \n Shutting Down Server....");
+			socket.close();
+			
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
