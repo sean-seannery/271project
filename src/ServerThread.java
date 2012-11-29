@@ -12,14 +12,10 @@ public abstract class ServerThread extends Thread{
 	private Socket socket;
 	private ObjectInputStream inputStream;
 	private ObjectOutputStream outputStream;
-	private int currentAcceptNum;  //this containts the last accepted ballot number
-	private String acceptValue; //this contains the current value known to this server (what was last accepted)
 	private Server parentServer;
 	
 	public ServerThread(Server psrv, Socket skt){
 		this.socket = skt;
-		this.acceptValue = null;
-		currentAcceptNum = 0;
 		parentServer = psrv;
         try
         {
@@ -75,7 +71,7 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        	if (proposedBallot > parentServer.getCurrentBallotNumber() || (proposedBallot == parentServer.getCurrentBallotNumber() && proposedprocessID > parentServer.getProcessId()) ){
 		        		parentServer.setCurrentBallotNumber(proposedBallot);
 		        		//send the ack message with the current ballot, the last accepted ballot, the current value.
-		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, parentServer.getCurrentBallotNumber() + ","+ currentAcceptNum + "," + this.acceptValue, socket.getInetAddress().getHostName() );
+		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, parentServer.getCurrentBallotNumber() + ","+ parentServer.getCurrentAcceptNum() + "," + parentServer.getAcceptValue(), socket.getInetAddress().getHostName() );
 		        		System.out.println("SENDING: PAXOS_ACK to " + socket.getInetAddress().getHostName());
 		        		sendMessage(socket.getInetAddress().getHostName(), 3000, ackMessage);
 		        	
@@ -125,7 +121,7 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        			//tell all other servers to accept my values
 		        			for (int i = 0; i < Server.StatServers.size(); i++){
 		        								        		
-		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, parentServer.getCurrentBallotNumber() +","+ this.acceptValue ,socket.getLocalAddress().getHostAddress() );
+		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, parentServer.getCurrentBallotNumber() +","+ parentServer.getAcceptValue() ,socket.getLocalAddress().getHostAddress() );
 		        				System.out.println("SENDING: PAXOS_ACCEPT to " + Server.StatServers.get(i) );
 		        				sendMessage(Server.StatServers.get(i), 3000, acceptMsg);
 				        	}
@@ -142,10 +138,37 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        	
 		        	break;
 		        	
+		        case ServerMessage.PAXOS_ACCEPT:
+		        	proposedBallot = Integer.parseInt(msg.getMessage().split(",")[0]);
+		        	String proposedVal = msg.getMessage().split(",")[0];
+		        	
+		        
+		        	if (proposedBallot >= parentServer.getCurrentBallotNumber()) {
+		        		
+		        		//if the current accept num is the same as the proposed ballot, we have seen this message before
+		        		//and should not send out more accept messages
+		        		if (parentServer.getCurrentAcceptNum() < proposedBallot) {
+		        			
+		        			parentServer.setAcceptValue(proposedVal);
+			        		parentServer.setCurrentAcceptNum(proposedBallot);
+		        			
+		        			for (int i = 0; i < Server.StatServers.size(); i++){
+		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT,  proposedBallot +","+ proposedVal ,socket.getLocalAddress().getHostAddress() );
+		        				System.out.println("FORWARDING: PAXOS_ACCEPT to " + Server.StatServers.get(i) );
+		        				sendMessage(Server.StatServers.get(i), 3000, acceptMsg);
+				        	}
+		        			
+		        			
+		        		}
+		        				        		
+		        		 
+		        	//if you already recieved accept once for this ballot then do not send message.
+		        	}
+		        	
+		        
 		        case ServerMessage.PAXOS_DECIDE:
 		        	//do something
-		        case ServerMessage.PAXOS_ACCEPT:
-		        	//do something
+		        
 		         	
 		        case ServerMessage.TWOPHASE_VOTE_REQUEST:
 		        	//reply yes or no

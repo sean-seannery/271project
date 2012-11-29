@@ -25,8 +25,12 @@ public class Server {
 	private boolean isStatServer;
 	private int processID;
 
+	//these variables need to be synchronized
 	private int currentBallotNumber;	
+	private String acceptValue;
 	private Hashtable<Integer,ArrayList<ServerMessage> > messageHash;
+	private int currentAcceptNum;  //this containts the last accepted ballot number
+	 //this contains the current value known to this server (what was last accepted)
 
 	public static final ArrayList<String> StatServers = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu"));
 	public static final ArrayList<String> GradeServers = new ArrayList<String>(Arrays.asList("1.2.3.4",
@@ -35,6 +39,8 @@ public class Server {
 	
 
 	public Server() {
+		currentAcceptNum = 0;
+		acceptValue = null;
 		processID = UUID.randomUUID().hashCode();
 		currentBallotNumber = 0;
 		port = 3000;
@@ -156,7 +162,7 @@ public class Server {
     	    buffer.write(data);
             buffer.close(); 
  
-	        System.out.println("Wrote to file");
+	        System.out.println("WROTE TO FILE " + filename + ": " + data);
  
     	}catch(IOException e){
     		System.out.println("Error Writing Local File:");
@@ -184,5 +190,21 @@ public class Server {
 	
 	public int getProcessId() {
 		return processID;
+	}
+
+	public synchronized String getAcceptValue() {
+		return acceptValue;
+	}
+
+	public synchronized void setAcceptValue(String acceptValue) {
+		this.acceptValue = acceptValue;
+	}
+
+	public synchronized int getCurrentAcceptNum() {
+		return currentAcceptNum;
+	}
+
+	public synchronized void setCurrentAcceptNum(int currentAcceptNum) {
+		this.currentAcceptNum = currentAcceptNum;
 	}
 }
