@@ -48,6 +48,17 @@ public abstract class ServerThread extends Thread{
 		        	//read the file
 		        case ServerMessage.CLIENT_APPEND:
 		        	//create a new ballot by incrementing current ballot by 1
+		        	if (!parentServer.isPaxosLeader()){
+		        		parentServer.addPaxosLeaders(socket.getLocalAddress().getHostAddress());
+		        		parentServer.setPaxosLeader(true);
+		        		for (int i = 0; i < Server.StatServers.size(); i++){
+		        			ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getLocalAddress().getHostAddress(), socket.getLocalAddress().getHostAddress() );
+			        		System.out.println("SENDING: ADD_LEADER to " + Server.StatServers.get(i));
+			        		sendMessage(Server.StatServers.get(i), 3000, leaderMsg);
+			        	}
+		        		//send
+		        	}
+		        			        	
 		        	parentServer.setCurrentBallotNumber(parentServer.getCurrentBallotNumber()+1);
 		        	ServerMessage ballot = new ServerMessage(ServerMessage.PAXOS_PREPARE, parentServer.getCurrentBallotNumber() + "," + parentServer.getProcessId(), socket.getLocalAddress().getHostAddress() );
 		        	
@@ -94,82 +105,39 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        	//check to see if we have gotten a majority of responses... if not, do nothing
 		        	if(ballot_msgs.size() > Server.StatServers.size()/2)
 		        	{
-		        		boolean all_null = true;
-		        		int highest_accept_num = -1;
-		        		String highest_accept_val = null;
-		        		//if we have, loop through the acks to see if we have an initial value.
-		        		for (int i = 0; i < ballot_msgs.size(); i++){
-		        			ServerMessage temp_msg = (ServerMessage)ballot_msgs.get(i);
-		        	     	int proposedacceptnum = Integer.parseInt(temp_msg.getMessage().split(",")[1]);
-		        	     	String proposedVal = temp_msg.getMessage().split(",")[2];
-		        			
-		        	     	if (proposedacceptnum > highest_accept_num ) {
-		        	     		
-		        	     		highest_accept_num = proposedacceptnum;
-		        	     		highest_accept_val = proposedVal;
-		        	     	}
-		        	     	
-				        	if (!proposedVal.equals("null")){
-				        		all_null = false;
-				        	}
-		        		}
-		        		
-		        		if (all_null) {
-		        			//write line of grades / stats into file
-		        			parentServer.appendFile("TEST WRITING SHIT");
-		        			
-		        			//tell all other servers to accept my values
-		        			for (int i = 0; i < Server.StatServers.size(); i++){
-		        								        		
-		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, parentServer.getCurrentBallotNumber() +","+ parentServer.getAcceptValue() ,socket.getLocalAddress().getHostAddress() );
-		        				System.out.println("SENDING: PAXOS_ACCEPT to " + Server.StatServers.get(i) );
-		        				sendMessage(Server.StatServers.get(i), 3000, acceptMsg);
-				        	}
-				        	
-		        			
-		        		} else {
-		        			for (int i = 0; i < Server.StatServers.size(); i++){
-		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT,  parentServer.getCurrentBallotNumber() +","+ highest_accept_val ,socket.getLocalAddress().getHostAddress() );
-		        				System.out.println("SENDING: PAXOS_ACCEPT to " + Server.StatServers.get(i) );
-		        				sendMessage(Server.StatServers.get(i), 3000, acceptMsg);
-				        	}
-		        		}
+
+        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, parentServer.getCurrentBallotNumber() +","+ parentServer.getAcceptValue() ,socket.getLocalAddress().getHostAddress() );
+        				System.out.println("SENDING: PAXOS_ACCEPT to " + Server.stat2PCLeader );
+        				sendMessage(Server.stat2PCLeader, 3000, acceptMsg);
+		        	
 		        	}
 		        	
 		        	break;
 		        	
 		        case ServerMessage.PAXOS_ACCEPT:
-		        	proposedBallot = Integer.parseInt(msg.getMessage().split(",")[0]);
-		        	String proposedVal = msg.getMessage().split(",")[0];
 		        	
-		        
-		        	if (proposedBallot >= parentServer.getCurrentBallotNumber()) {
-		        		
-		        		//if the current accept num is the same as the proposed ballot, we have seen this message before
-		        		//and should not send out more accept messages
-		        		if (parentServer.getCurrentAcceptNum() < proposedBallot) {
-		        			
-		        			parentServer.setAcceptValue(proposedVal);
-			        		parentServer.setCurrentAcceptNum(proposedBallot);
-		        			
-		        			for (int i = 0; i < Server.StatServers.size(); i++){
-		        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT,  proposedBallot +","+ proposedVal ,socket.getLocalAddress().getHostAddress() );
-		        				System.out.println("FORWARDING: PAXOS_ACCEPT to " + Server.StatServers.get(i) );
-		        				sendMessage(Server.StatServers.get(i), 3000, acceptMsg);
-				        	}
-		        			
-		        			
+		        	parentServer.setPaxosLeaderResponseCount(parentServer.getPaxosLeaderResponseCount() + 1);
+		        	
+		        	if (parentServer.getPaxosLeaderResponseCount() == parentServer.getPaxosLeaders().size()){
+		        		//reset response count for the next query
+		        		parentServer.setPaxosLeaderResponseCount(0);
+		        		String acceptVal = msg.getMessage().split(",")[1]; //for tie breakers
+		        		for (int i = 0; i < Server.StatServers.size(); i++){
+		        			ServerMessage vote2pc = new ServerMessage(ServerMessage.TWOPHASE_VOTE_REQUEST, acceptVal);
+			        		System.out.println("SENDING: TWOPHASE_VOTE_REQUEST to " + Server.StatServers.get(i));
+			        		sendMessage(Server.StatServers.get(i), 3000, vote2pc);
 		        		}
-		        				        		
-		        		 
-		        	//if you already recieved accept once for this ballot then do not send message.
 		        	}
 		        	
 		        
-		        case ServerMessage.PAXOS_DECIDE:
-		        	//do something
+		        	
+		        	
+		        	 break;
 		        
+		        case ServerMessage.PAXOS_ADD_LEADER:
+		        	parentServer.addPaxosLeaders(msg.getMessage());
 		         	
+		        	
 		        case ServerMessage.TWOPHASE_VOTE_REQUEST:
 		        	//reply yes or no
 		        case ServerMessage.TWOPHASE_VOTE_YES:

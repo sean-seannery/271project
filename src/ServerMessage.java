@@ -9,7 +9,7 @@ public class ServerMessage implements Serializable {
 	static final int PAXOS_PREPARE = 0;
 	static final int PAXOS_ACK = 1;
 	static final int PAXOS_ACCEPT = 2;
-	static final int PAXOS_DECIDE = 3;
+	static final int PAXOS_ADD_LEADER = 3;
 	//two phase commit message types
 	static final int TWOPHASE_VOTE_REQUEST = 10;
 	static final int TWOPHASE_VOTE_YES = 11;

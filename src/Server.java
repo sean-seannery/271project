@@ -31,14 +31,21 @@ public class Server {
 	private Hashtable<Integer,ArrayList<ServerMessage> > messageHash;
 	private int currentAcceptNum;  //this containts the last accepted ballot number
 	 //this contains the current value known to this server (what was last accepted)
+	private boolean isPaxosLeader;
+	private ArrayList<String> paxosLeaders;
+	private int paxosLeaderResponseCount;
 
 	public static final ArrayList<String> StatServers = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu"));
 	public static final ArrayList<String> GradeServers = new ArrayList<String>(Arrays.asList("1.2.3.4",
 			"1.2.3.4",
 			"1.2.3.4"));
+	public static final String stat2PCLeader = "beavis.cs.ucsb.edu";
+	public static final String grade2PCLeader = "1.2.3.4";
 	
 
 	public Server() {
+		paxosLeaderResponseCount = 0;
+		paxosLeaders = new ArrayList<String>();
 		currentAcceptNum = 0;
 		acceptValue = null;
 		processID = UUID.randomUUID().hashCode();
@@ -206,5 +213,29 @@ public class Server {
 
 	public synchronized void setCurrentAcceptNum(int currentAcceptNum) {
 		this.currentAcceptNum = currentAcceptNum;
+	}
+
+	public synchronized boolean isPaxosLeader() {
+		return isPaxosLeader;
+	}
+
+	public synchronized void setPaxosLeader(boolean isPaxosLeader) {
+		this.isPaxosLeader = isPaxosLeader;
+	}
+
+	public synchronized int getPaxosLeaderResponseCount() {
+		return paxosLeaderResponseCount;
+	}
+
+	public synchronized void setPaxosLeaderResponseCount(int paxosLeaderCount) {
+		this.paxosLeaderResponseCount = paxosLeaderCount;
+	}
+
+	public synchronized ArrayList<String> getPaxosLeaders() {
+		return paxosLeaders;
+	}
+
+	public synchronized void addPaxosLeaders(String newleader) {
+		this.paxosLeaders.add(newleader);
 	}
 }
