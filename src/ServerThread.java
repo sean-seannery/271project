@@ -53,10 +53,15 @@ public abstract class ServerThread extends Thread{
 		        			ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getLocalAddress().getHostAddress(), socket.getLocalAddress().getHostAddress() );
 			        		sendMessage(Server.StatServers.get(i), 3000, leaderMsg);
 			        	}
-                	} 
-                		
-                	sendMessage(socket.getInetAddress().getHostAddress(), 3000, new ServerMessage(ServerMessage.LEADER_RESPONSE, parentServer.getPaxosLeaders().get(0)));
+	                	sendMessage(socket.getInetAddress().getHostAddress(), 3000, new ServerMessage(ServerMessage.LEADER_RESPONSE, socket.getLocalAddress().getHostAddress() ));
 
+                	} else {
+                		
+                		sendMessage(socket.getInetAddress().getHostAddress(), 3000, new ServerMessage(ServerMessage.LEADER_RESPONSE, parentServer.getPaxosLeaders().get(0) ));
+
+                	}
+                		
+                	
             	    
 		        case ServerMessage.CLIENT_READ:
 		        	//read the file
