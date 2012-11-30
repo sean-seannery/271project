@@ -65,6 +65,8 @@ public class Client {
       line = (ServerMessage) from_server.readObject();
       if(line != null) {
         host = line.getMessage();
+        System.out.print("Reading " + host + " from Server");
+        
       }
       socket.close();
     }
