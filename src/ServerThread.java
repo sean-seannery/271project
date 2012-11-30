@@ -78,6 +78,7 @@ public abstract class ServerThread extends Thread{
 		        	ServerMessage ballotMsg = new ServerMessage(ServerMessage.PAXOS_PREPARE, msg.getMessage(), socket.getLocalAddress().getHostAddress() );
 		        	ballotMsg.setBallotNumber(parentServer.getCurrentBallotNumber());
 		        	ballotMsg.setBallotProcID(parentServer.getProcessId());
+		        	ballotMsg.setSourceAddress(socket.getInetAddress().getHostName());
 	        	
 		        	//send to all other stat or grade servers
 
@@ -100,7 +101,7 @@ public abstract class ServerThread extends Thread{
 		        		ackMessage.setBallotNumber(parentServer.getCurrentBallotNumber());
 		        		ackMessage.setLastAcceptNumber(parentServer.getCurrentAcceptNum());
 		        		ackMessage.setLastAcceptVal(parentServer.getAcceptValue());
-		        		
+		        		ackMessage.setSourceAddress(msg.getSourceAddress());
 		        		sendMessage(socket.getInetAddress().getHostName(), 3000, ackMessage);
 		        	
 		        	}
@@ -125,6 +126,7 @@ public abstract class ServerThread extends Thread{
 		        		
         				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, msg.getMessage() ,socket.getLocalAddress().getHostAddress() );
         				acceptMsg.setBallotNumber(parentServer.getCurrentBallotNumber());
+        				acceptMsg.setSourceAddress(msg.getSourceAddress());
         				sendMessage(Server.stat2PCLeader, 3000, acceptMsg);
 		        	
 		        	}
@@ -142,6 +144,7 @@ public abstract class ServerThread extends Thread{
 		        		String acceptVal = msg.getMessage(); //for tie breakers
 		        		for (int i = 0; i < Server.StatServers.size(); i++){
 		        			ServerMessage vote2pc = new ServerMessage(ServerMessage.TWOPHASE_VOTE_REQUEST, acceptVal);
+		        			vote2pc.setSourceAddress(msg.getSourceAddress());
 			        		sendMessage(Server.StatServers.get(i), 3000, vote2pc);
 		        		}
 		        	}
@@ -166,12 +169,14 @@ public abstract class ServerThread extends Thread{
 		        	} catch (IOException e){
 		        		//reply no
 		        		ServerMessage replyNo = new ServerMessage(ServerMessage.TWOPHASE_VOTE_NO, msg.getMessage());
+		        		replyNo.setSourceAddress(msg.getSourceAddress());
 		        		sendMessage(Server.stat2PCLeader, 3000, replyNo);
 		        		break;
 		        	}
 		        	
 		        	//reply yes
 		        	ServerMessage replyYes = new ServerMessage(ServerMessage.TWOPHASE_VOTE_YES, msg.getMessage());
+		        	replyYes.setSourceAddress(msg.getSourceAddress());
 	        		sendMessage(Server.stat2PCLeader, 3000, replyYes);
 	        		break;
 		        	
@@ -185,8 +190,11 @@ public abstract class ServerThread extends Thread{
 		        		String acceptVal = msg.getMessage(); //for tie breakers
 		        		for (int i = 0; i < Server.StatServers.size(); i++){
 		        			ServerMessage commitMsg = new ServerMessage(ServerMessage.TWOPHASE_COMMIT, acceptVal);
+		        			commitMsg.setSourceAddress(msg.getSourceAddress());
 			        		sendMessage(Server.StatServers.get(i), 3000, commitMsg);
 		        		}
+		        		//tell the client we are writing
+		        		sendMessage(msg.getSourceAddress(), 3003, new ServerMessage(ServerMessage.TWOPHASE_COMMIT, "VALUE COMMITED: " + msg.getMessage() ));
 		        	}
 		        	break;
 		        	
@@ -195,6 +203,7 @@ public abstract class ServerThread extends Thread{
 		        	//send abort
 		        	for (int i = 0; i < Server.StatServers.size(); i++){
 	        			ServerMessage abortMsg = new ServerMessage(ServerMessage.TWOPHASE_ABORT, msg.getMessage());
+	        			abortMsg.setSourceAddress(msg.getSourceAddress());
 		        		sendMessage(Server.StatServers.get(i), 3000, abortMsg);
 	        		}
 		        	break;
@@ -202,6 +211,9 @@ public abstract class ServerThread extends Thread{
 		        case ServerMessage.TWOPHASE_ABORT:
 		        	//cancel the write changes
 		        	parentServer.appendFile("ABORT:"+msg.getMessage(), "REDO.log");
+		        	//tell client we aborted the write
+		        	sendMessage(msg.getSourceAddress(), 3003,new ServerMessage(ServerMessage.TWOPHASE_ABORT, "ABORTED WRITING: " + msg.getMessage()) );
+		        	
 		        	break;
 		        	
 		        case ServerMessage.TWOPHASE_COMMIT:
