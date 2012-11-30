@@ -19,6 +19,8 @@ public class Client {
       String command = args[1];
       
       ServerMessage msg = new ServerMessage();
+      ServerMessage prepare = new ServerMessage();
+      prepare.setType(ServerMessage.CLIENT_GET_LEADER);
       
       if(command.equals("APPEND")){
     	  msg.setType(ServerMessage.CLIENT_APPEND);
@@ -41,6 +43,34 @@ public class Client {
         msg.setMessage(gradeString);
       }
       
+    try {
+      InetAddress address = InetAddress.getByName(host);
+      System.out.print("Connecting to Server...");
+      
+      // open socket, then input and output streams to it
+      Socket socket = new Socket(address,port);
+
+      ObjectInputStream from_server = new ObjectInputStream(socket.getInputStream());
+      ObjectOutputStream to_server = new ObjectOutputStream(socket.getOutputStream());
+      System.out.println("Connected");
+      
+      // send command to server, then read and print lines until
+      // the server closes the connection
+      System.out.print("SENDING " + prepare + " to Server:" + host + "...");
+      msg.setSourceAddress("CLIENT");
+      to_server.writeObject(prepare); to_server.flush();
+      System.out.println("SENT");
+      ServerMessage line;
+      
+      line = (ServerMessage) from_server.readObject();
+      if(line != null) {
+        host = line.getMessage();
+      }
+      socket.close();
+    }
+    catch (Exception e) {    // report any exceptions
+      System.err.println(e);
+    }
       
      
       
