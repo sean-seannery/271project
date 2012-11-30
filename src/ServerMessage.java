@@ -86,6 +86,8 @@ public class ServerMessage implements Serializable {
 		typemapping.put(14, "TWOPHASE_ABORT");
 		typemapping.put(20, "CLIENT_READ");
 		typemapping.put(21, "CLIENT_APPEND");
+		typemapping.put(22, "CLIENT_GET_LEADER");
+		typemapping.put(23, "LEADER_RESPONSE");
 	
 		if (this.type == -1) {
 			return null;
