@@ -61,10 +61,11 @@ public abstract class ServerThread extends Thread{
 
                 	}
                 		
-                	
+                	break;
             	    
 		        case ServerMessage.CLIENT_READ:
 		        	//read the file
+		        	break;
 		        case ServerMessage.CLIENT_APPEND:
 		        	//create a new ballot by incrementing current ballot by 1
 		        	if (!parentServer.isPaxosLeader()){
