@@ -82,7 +82,7 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        	if (proposedBallot > parentServer.getCurrentBallotNumber() || (proposedBallot == parentServer.getCurrentBallotNumber() && proposedprocessID >= parentServer.getProcessId()) ){
 		        		parentServer.setCurrentBallotNumber(proposedBallot);
 		        		//send the ack message with the current ballot, the last accepted ballot, the current value.
-		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, parentServer.getCurrentBallotNumber() + ","+ parentServer.getCurrentAcceptNum() + "," + parentServer.getAcceptValue(), socket.getInetAddress().getHostName() );
+		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, parentServer.getCurrentBallotNumber() + ","+ parentServer.getCurrentAcceptNum() + "," + parentServer.getAcceptValue(), socket.getLocalAddress().getHostName() );
 		        		sendMessage(socket.getInetAddress().getHostName(), 3000, ackMessage);
 		        	
 		        	}
@@ -167,7 +167,7 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		
 		 try {
 		      InetAddress address = InetAddress.getByName(host);
-		      System.out.print("  Connecting to Server:"+host+"...");
+		      System.out.print("      Connecting to Server:"+host+"...");
 		      
 		      // open socket, then input and output streams to it
 		      Socket socket = new Socket(address,port);
@@ -180,7 +180,7 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		      to_server.writeObject(msg); to_server.flush();
 		      System.out.println("....SENT");
 		 } catch (IOException e){
-			 System.out.println("  ERROR: Server failed sending message:" + e.getMessage());
+			 System.out.println("      ERROR: Server failed sending message:" + e.getMessage());
 		 }
 	}
 	
