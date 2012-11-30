@@ -75,20 +75,20 @@ public class Server {
 		
 	    try {
 			socket = new ServerSocket(this.port);
-		
-			System.out.println("Server listening on port " + port + "....");
+			
+			System.out.println("Server listening on " + socket.getInetAddress().getHostAddress() + ":" + port );
 			System.out.println("=============================================");
 			
 			
 
 	        // Create a buffered reader to stdin
-			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+			//BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
 			
 			while (!Thread.interrupted()) {
 			
 				Socket connected_socket;
-							
+				
 				connected_socket = socket.accept();
 								
 				ServerThread t;

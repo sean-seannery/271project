@@ -49,7 +49,6 @@ public abstract class ServerThread extends Thread{
 		        case ServerMessage.CLIENT_APPEND:
 		        	//create a new ballot by incrementing current ballot by 1
 		        	if (!parentServer.isPaxosLeader()){
-		        		parentServer.addPaxosLeaders(socket.getLocalAddress().getHostAddress());
 		        		parentServer.setPaxosLeader(true);
 		        		for (int i = 0; i < Server.StatServers.size(); i++){
 		        			ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getLocalAddress().getHostAddress(), socket.getLocalAddress().getHostAddress() );
@@ -61,7 +60,7 @@ public abstract class ServerThread extends Thread{
 		        	parentServer.setCurrentBallotNumber(parentServer.getCurrentBallotNumber()+1);
 		        	ServerMessage ballot = new ServerMessage(ServerMessage.PAXOS_PREPARE, parentServer.getCurrentBallotNumber() + "," + parentServer.getProcessId(), socket.getLocalAddress().getHostAddress() );
 		        	
-System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
+
 	        	
 		        	//send to all other stat or grade servers
 
@@ -115,6 +114,8 @@ System.out.println("My address:" + socket.getLocalAddress().getHostAddress() );
 		        case ServerMessage.PAXOS_ACCEPT:
 		        	
 		        	parentServer.setPaxosLeaderResponseCount(parentServer.getPaxosLeaderResponseCount() + 1);
+		        	System.out.println(parentServer.getPaxosLeaderResponseCount());
+		        	System.out.println(parentServer.getPaxosLeaders().size());
 		        	
 		        	if (parentServer.getPaxosLeaderResponseCount() == parentServer.getPaxosLeaders().size()){
 		        		//reset response count for the next query
