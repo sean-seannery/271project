@@ -25,31 +25,51 @@ public class ServerMessage implements Serializable {
 	private int type;
 	private String msg;
 	private String sourceAddress;
-	
+	private int ballotNumber;
+	private int ballotProcID;
+	private int lastAcceptNumber;
+	private String lastAcceptVal;
 
 	public ServerMessage(int newType, String newMsg, String src){
 		setMessage(newMsg);
 		setType(newType);
 		setSourceAddress(src);
+		ballotNumber = -1;
+		ballotProcID = -1;
+		lastAcceptVal = null;
 	}
 	
 	public ServerMessage(int newType, String newMsg){
 		setMessage(newMsg);
 		setType(newType);
+		ballotNumber = -1;
+		ballotProcID = -1;
+		lastAcceptVal = null;
 	}
 	
 	public ServerMessage(int newType){
 		setMessage(null);
 		setType(newType);
 		setSourceAddress(null);
+		ballotNumber = -1;
+		ballotProcID = -1;
+		lastAcceptVal = null;
 	}
 	
 	public ServerMessage(){
 		setMessage(null);
 		setType(-1);
 		setSourceAddress(null);
+		ballotNumber = -1;
+		ballotProcID = -1;
+		lastAcceptVal = null;
 	}
 	
+	public String toString(){
+		
+		return "ServerMessage{source:" + getSourceAddress() + " type:" + this.getTypeName() + " msg:" + this.getMessage() + "}";
+	}
+
 	public String getTypeName() {
 		
 		Hashtable typemapping = new Hashtable();
@@ -98,8 +118,37 @@ public class ServerMessage implements Serializable {
 		this.type = newType;
 	}
 	
-	public String toString(){
-		
-		return "ServerMessage{source:" + getSourceAddress() + " type:" + this.getTypeName() + " msg:" + this.getMessage() + "}";
+	public int getBallotNumber() {
+		return ballotNumber;
 	}
+
+	public void setBallotNumber(int ballotNumber) {
+		this.ballotNumber = ballotNumber;
+	}
+
+	public int getBallotProcID() {
+		return ballotProcID;
+	}
+
+	public void setBallotProcID(int ballotProcID) {
+		this.ballotProcID = ballotProcID;
+	}
+
+	public int getLastAcceptNumber() {
+		return lastAcceptNumber;
+	}
+
+	public void setLastAcceptNumber(int lastAcceptNumber) {
+		this.lastAcceptNumber = lastAcceptNumber;
+	}
+
+	public String getLastAcceptVal() {
+		return lastAcceptVal;
+	}
+
+	public void setLastAcceptVal(String lastAcceptVal) {
+		this.lastAcceptVal = lastAcceptVal;
+	}
+
+	
 }

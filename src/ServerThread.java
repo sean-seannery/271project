@@ -58,30 +58,32 @@ public abstract class ServerThread extends Thread{
 		        	}
 		        			        	
 		        	parentServer.setCurrentBallotNumber(parentServer.getCurrentBallotNumber()+1);
-		        	ServerMessage ballot = new ServerMessage(ServerMessage.PAXOS_PREPARE, parentServer.getCurrentBallotNumber() + "," + parentServer.getProcessId(), socket.getLocalAddress().getHostAddress() );
-		        	
-
+		        	ServerMessage ballotMsg = new ServerMessage(ServerMessage.PAXOS_PREPARE, msg.getMessage(), socket.getLocalAddress().getHostAddress() );
+		        	ballotMsg.setBallotNumber(parentServer.getCurrentBallotNumber());
+		        	ballotMsg.setBallotProcID(parentServer.getProcessId());
 	        	
 		        	//send to all other stat or grade servers
 
 		        	for (int i = 0; i < Server.StatServers.size(); i++){
-		        		sendMessage(Server.StatServers.get(i), 3000, ballot);
+		        		sendMessage(Server.StatServers.get(i), 3000, ballotMsg);
 		        	}
 		        	break;
 		   
 		        case ServerMessage.PAXOS_PREPARE:
 		 
 		        	//contents of the incoming prepare message are ballotnum,processesid.
-		        	int proposedBallot = Integer.parseInt(msg.getMessage().split(",")[0]);
-		        	int proposedprocessID = Integer.parseInt(msg.getMessage().split(",")[1]); //for tie breakers
 		        	//if the incoming ballot is newer than my ballot, update my ballot and send an ack, otherwise the incoming
 		        	//ballot is old and we can ignore it
-		        	//or if the ballots are the same, process id will be the tie breaker. 
-		        	//if the prepare is sent to myself
-		        	if (proposedBallot > parentServer.getCurrentBallotNumber() || (proposedBallot == parentServer.getCurrentBallotNumber() && proposedprocessID >= parentServer.getProcessId()) ){
-		        		parentServer.setCurrentBallotNumber(proposedBallot);
+		        	// if the ballots are the same, process id will be the tie breaker. 
+		        	if (msg.getBallotNumber() > parentServer.getCurrentBallotNumber() || (msg.getBallotNumber() == parentServer.getCurrentBallotNumber() && msg.getBallotProcID() >= parentServer.getProcessId()) ){
+		        		parentServer.setCurrentBallotNumber(msg.getBallotNumber());
 		        		//send the ack message with the current ballot, the last accepted ballot, the current value.
-		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, parentServer.getCurrentBallotNumber() + ","+ parentServer.getCurrentAcceptNum() + "," + parentServer.getAcceptValue(), socket.getLocalAddress().getHostName() );
+		        		
+		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, msg.getMessage(), socket.getLocalAddress().getHostName() );
+		        		ackMessage.setBallotNumber(parentServer.getCurrentBallotNumber());
+		        		ackMessage.setLastAcceptNumber(parentServer.getCurrentAcceptNum());
+		        		ackMessage.setLastAcceptVal(parentServer.getAcceptValue());
+		        		
 		        		sendMessage(socket.getInetAddress().getHostName(), 3000, ackMessage);
 		        	
 		        	}
@@ -89,22 +91,23 @@ public abstract class ServerThread extends Thread{
 		        	
 		        case ServerMessage.PAXOS_ACK:
 		        	//contents of the incoming ack message are current ballot, the last accepted ballot, the current value
-		        	proposedBallot = Integer.parseInt(msg.getMessage().split(",")[0]);
+		        	
 		        	Hashtable<Integer,ArrayList<ServerMessage> > hash = parentServer.getMessageHash();
-		        	ArrayList<ServerMessage> ballot_msgs = hash.get(proposedBallot);
+		        	ArrayList<ServerMessage> ballot_msgs = hash.get( msg.getBallotNumber() );
 		            //add the incoming message to a collection of responses for this ballot
 		        	if (ballot_msgs == null){
 		        		ballot_msgs = new ArrayList<ServerMessage>();
 		        	}
 		            ballot_msgs.add(msg);
-		        	hash.put(proposedBallot, ballot_msgs);
+		        	hash.put(msg.getBallotNumber(), ballot_msgs);
 		        	parentServer.setMessageHash(hash);
 
 		        	//check to see if we have gotten a majority of responses... if not, do nothing
 		        	if(ballot_msgs.size() > Server.StatServers.size()/2)
 		        	{
-
-        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, parentServer.getCurrentBallotNumber() +","+ parentServer.getAcceptValue() ,socket.getLocalAddress().getHostAddress() );
+		        		
+        				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, msg.getMessage() ,socket.getLocalAddress().getHostAddress() );
+        				acceptMsg.setBallotNumber(parentServer.getCurrentBallotNumber());
         				sendMessage(Server.stat2PCLeader, 3000, acceptMsg);
 		        	
 		        	}
@@ -114,16 +117,15 @@ public abstract class ServerThread extends Thread{
 		        case ServerMessage.PAXOS_ACCEPT:
 		        	
 		        	parentServer.setPaxosLeaderResponseCount(parentServer.getPaxosLeaderResponseCount() + 1);
-		        	System.out.println(parentServer.getPaxosLeaderResponseCount());
-		        	System.out.println(parentServer.getPaxosLeaders().size());
+		
 		        	
 		        	if (parentServer.getPaxosLeaderResponseCount() == parentServer.getPaxosLeaders().size()){
 		        		//reset response count for the next query
 		        		parentServer.setPaxosLeaderResponseCount(0);
-		        		String acceptVal = msg.getMessage().split(",")[1]; //for tie breakers
+		        		String acceptVal = msg.getMessage(); //for tie breakers
 		        		for (int i = 0; i < Server.StatServers.size(); i++){
 		        			ServerMessage vote2pc = new ServerMessage(ServerMessage.TWOPHASE_VOTE_REQUEST, acceptVal);
-			        		sendMessage(Server.StatServers.get(i), 3000, vote2pc);
+			        		sendMessage(Server.stat2PCLeader, 3000, vote2pc);
 		        		}
 		        	}
 		        	
@@ -138,6 +140,9 @@ public abstract class ServerThread extends Thread{
 		        	
 		        case ServerMessage.TWOPHASE_VOTE_REQUEST:
 		        	//reply yes or no
+		        	ServerMessage replyYes = new ServerMessage(ServerMessage.TWOPHASE_VOTE_YES, msg.getMessage());
+	        		sendMessage(Server.stat2PCLeader, 3000, replyYes);
+		        	
 		        case ServerMessage.TWOPHASE_VOTE_YES:
 		        	//tally yes vote
 		        case ServerMessage.TWOPHASE_VOTE_NO:
