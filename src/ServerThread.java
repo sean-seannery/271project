@@ -44,16 +44,27 @@ public abstract class ServerThread extends Thread{
             System.out.println("RECIEVED:" + msg);
             
             switch (msg.getType()) {
+            
+                case ServerMessage.CLIENT_GET_LEADER:
+                	
+                	if (parentServer.getPaxosLeaders().size() == 0) {
+                		parentServer.setPaxosLeader(true);
+	                	for (int i = 0; i < Server.StatServers.size(); i++){
+		        			ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getLocalAddress().getHostAddress(), socket.getLocalAddress().getHostAddress() );
+			        		sendMessage(Server.StatServers.get(i), 3000, leaderMsg);
+			        	}
+                	} 
+                		
+                	sendMessage(socket.getInetAddress().getHostAddress(), 3000, new ServerMessage(ServerMessage.LEADER_RESPONSE, parentServer.getPaxosLeaders().get(0)));
+
+            	    
 		        case ServerMessage.CLIENT_READ:
 		        	//read the file
 		        case ServerMessage.CLIENT_APPEND:
 		        	//create a new ballot by incrementing current ballot by 1
 		        	if (!parentServer.isPaxosLeader()){
 		        		parentServer.setPaxosLeader(true);
-		        		for (int i = 0; i < Server.StatServers.size(); i++){
-		        			ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getLocalAddress().getHostAddress(), socket.getLocalAddress().getHostAddress() );
-			        		sendMessage(Server.StatServers.get(i), 3000, leaderMsg);
-			        	}
+		        		
 		        		//send
 		        	}
 		        			        	
