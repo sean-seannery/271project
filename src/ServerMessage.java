@@ -21,6 +21,8 @@ public class ServerMessage implements Serializable {
 	//client message types
 	static final int CLIENT_READ = 20;
 	static final int CLIENT_APPEND = 21;
+	static final int CLIENT_GET_LEADER = 22;
+	static final int LEADER_RESPONSE = 23;
 	
 	private int type;
 	private String msg;
