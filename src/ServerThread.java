@@ -138,6 +138,7 @@ public abstract class ServerThread extends Thread{
 		        	if (!parentServer.getPaxosLeaders().contains(msg.getMessage())){
 		        	    parentServer.addPaxosLeaders(msg.getMessage());
 		        	}
+		        	break;
 		        	
 		        case ServerMessage.TWOPHASE_VOTE_REQUEST:
 		        	//attempt to write to redo log
@@ -180,10 +181,12 @@ public abstract class ServerThread extends Thread{
 		        		sendMessage(Server.StatServers.get(i), 3000, abortMsg);
 	        		}
 		        	break;
+		        	
 		        case ServerMessage.TWOPHASE_ABORT:
 		        	//cancel the write changes
 		        	parentServer.appendFile("ABORT:"+msg.getMessage(), "REDO.log");
 		        	break;
+		        	
 		        case ServerMessage.TWOPHASE_COMMIT:
 		        	String filename = "";
 		        	if (parentServer.isGradeServer() ) {
