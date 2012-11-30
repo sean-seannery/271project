@@ -53,11 +53,11 @@ public abstract class ServerThread extends Thread{
 		        			ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getLocalAddress().getHostAddress(), socket.getLocalAddress().getHostAddress() );
 			        		sendMessage(Server.StatServers.get(i), 3000, leaderMsg);
 			        	}
-	                	sendMessage(socket.getInetAddress().getHostAddress(), 3000, new ServerMessage(ServerMessage.LEADER_RESPONSE, socket.getLocalAddress().getHostAddress() ));
+	                	reply(new ServerMessage(ServerMessage.LEADER_RESPONSE, socket.getLocalAddress().getHostAddress() ));
 
                 	} else {
                 		
-                		sendMessage(socket.getInetAddress().getHostAddress(), 3000, new ServerMessage(ServerMessage.LEADER_RESPONSE, parentServer.getPaxosLeaders().get(0) ));
+                		reply(new ServerMessage(ServerMessage.LEADER_RESPONSE, parentServer.getPaxosLeaders().get(0) ));
 
                 	}
                 		
@@ -248,6 +248,20 @@ public abstract class ServerThread extends Thread{
 		      // the server closes the connection
 		      
 		      to_server.writeObject(msg); to_server.flush();
+		      System.out.println("....SENT");
+		 } catch (IOException e){
+			 System.out.println("      ERROR: Server failed sending message:" + e.getMessage());
+		 }
+	}
+	
+	private void reply(ServerMessage msg){
+		
+		System.out.println("REPLYING " + msg + " to Server:" + socket.getInetAddress().getHostAddress() + "...");
+		
+		 try {
+		      
+
+		      outputStream.writeObject(msg); outputStream.flush();
 		      System.out.println("....SENT");
 		 } catch (IOException e){
 			 System.out.println("      ERROR: Server failed sending message:" + e.getMessage());
