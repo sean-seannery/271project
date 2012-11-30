@@ -125,7 +125,7 @@ public abstract class ServerThread extends Thread{
 		        		String acceptVal = msg.getMessage(); //for tie breakers
 		        		for (int i = 0; i < Server.StatServers.size(); i++){
 		        			ServerMessage vote2pc = new ServerMessage(ServerMessage.TWOPHASE_VOTE_REQUEST, acceptVal);
-			        		sendMessage(Server.stat2PCLeader, 3000, vote2pc);
+			        		sendMessage(Server.StatServers.get(i), 3000, vote2pc);
 		        		}
 		        	}
 		        	
@@ -135,22 +135,66 @@ public abstract class ServerThread extends Thread{
 		        	 break;
 		        
 		        case ServerMessage.PAXOS_ADD_LEADER:
-		        	parentServer.addPaxosLeaders(msg.getMessage());
-		         	
+		        	if (!parentServer.getPaxosLeaders().contains(msg.getMessage())){
+		        	    parentServer.addPaxosLeaders(msg.getMessage());
+		        	}
 		        	
 		        case ServerMessage.TWOPHASE_VOTE_REQUEST:
-		        	//reply yes or no
+		        	//attempt to write to redo log
+		        	try {
+		        		
+		        		parentServer.appendFile("APPEND:"+msg.getMessage(), "REDO.log");
+		        		
+		        	} catch (IOException e){
+		        		//reply no
+		        		ServerMessage replyNo = new ServerMessage(ServerMessage.TWOPHASE_VOTE_NO, msg.getMessage());
+		        		sendMessage(Server.stat2PCLeader, 3000, replyNo);
+		        		break;
+		        	}
+		        	
+		        	//reply yes
 		        	ServerMessage replyYes = new ServerMessage(ServerMessage.TWOPHASE_VOTE_YES, msg.getMessage());
 	        		sendMessage(Server.stat2PCLeader, 3000, replyYes);
+	        		break;
 		        	
 		        case ServerMessage.TWOPHASE_VOTE_YES:
+		        	parentServer.setPaxosLeaderResponseCount(parentServer.getPaxosLeaderResponseCount() + 1);
+		
+		        	
+		        	if (parentServer.getPaxosLeaderResponseCount() == Server.StatServers.size()){
+		        		//reset response count for the next query
+		        		parentServer.setPaxosLeaderResponseCount(0);
+		        		String acceptVal = msg.getMessage(); //for tie breakers
+		        		for (int i = 0; i < Server.StatServers.size(); i++){
+		        			ServerMessage commitMsg = new ServerMessage(ServerMessage.TWOPHASE_COMMIT, acceptVal);
+			        		sendMessage(Server.StatServers.get(i), 3000, commitMsg);
+		        		}
+		        	}
+		        	break;
+		        	
 		        	//tally yes vote
 		        case ServerMessage.TWOPHASE_VOTE_NO:
 		        	//send abort
+		        	for (int i = 0; i < Server.StatServers.size(); i++){
+	        			ServerMessage abortMsg = new ServerMessage(ServerMessage.TWOPHASE_ABORT, msg.getMessage());
+		        		sendMessage(Server.StatServers.get(i), 3000, abortMsg);
+	        		}
+		        	break;
 		        case ServerMessage.TWOPHASE_ABORT:
 		        	//cancel the write changes
+		        	parentServer.appendFile("ABORT:"+msg.getMessage(), "REDO.log");
+		        	break;
 		        case ServerMessage.TWOPHASE_COMMIT:
+		        	String filename = "";
+		        	if (parentServer.isGradeServer() ) {
+		        		filename = "GRADES.txt";
+		        	} else if (parentServer.isStatServer() )
+		        	{
+		        		filename = "STATS.txt";
+		        	}
+		        	parentServer.appendFile(msg.getMessage(), filename);
 		        	//write any changes
+		        	break;
 	        
 	        }
         }

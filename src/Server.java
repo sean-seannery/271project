@@ -164,14 +164,8 @@ public class Server {
 	}
 	
 	
-	public synchronized void appendFile(String data) {
-		String filename = "TEST.txt";
-		if (isStatServer){
-			filename = "STATS.txt";
-		} else if (isGradeServer) {
-			filename = "GRADES.txt";
-		}
-		
+	public synchronized void appendFile(String data, String filename) throws IOException{
+			
 		try{
 		
 			File outfile = new File(filename);
@@ -190,6 +184,7 @@ public class Server {
     	}catch(IOException e){
     		System.out.println("Error Writing Local File:");
     		e.printStackTrace();
+    		throw new IOException(e);
     	}
 	}
 	
@@ -249,6 +244,14 @@ public class Server {
 
 	public synchronized ArrayList<String> getPaxosLeaders() {
 		return paxosLeaders;
+	}
+
+	public boolean isGradeServer() {
+		return isGradeServer;
+	}
+
+	public boolean isStatServer() {
+		return isStatServer;
 	}
 
 	public synchronized void addPaxosLeaders(String newleader) {
