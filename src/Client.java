@@ -65,8 +65,7 @@ public class Client {
       line = (ServerMessage) from_server.readObject();
       if(line != null) {
         host = line.getMessage();
-        System.out.print("Reading " + host + " from Server");
-        
+        System.out.print("Reading " + host + " from Server");     
       }
       socket.close();
     }
@@ -93,15 +92,34 @@ public class Client {
       msg.setSourceAddress("CLIENT");
       to_server.writeObject(msg); to_server.flush();
       System.out.println("SENT");
-      ServerMessage line;
-      
-      while ((line = (ServerMessage) from_server.readObject()) != null) {
-        System.out.println(line.getMessage());
-      }
+      socket.close();
     }
     catch (Exception e) {    // report any exceptions
       System.err.println(e);
     }
+    
+    try {
+        ServerSocket socket = new ServerSocket(3003);
+        while (true) {
+                
+            Socket connected_socket;
+            connected_socket = socket.accept();
+            ObjectInputStream from_server = new ObjectInputStream(connected_socket.getInputStream());
+
+            ServerMessage line;
+
+            line = (ServerMessage) from_server.readObject();
+            if(line != null) {
+                System.out.print("Reading " + line + " from Server");     
+            }
+
+            connected_socket.close();                   
+        }
+    }
+    catch (Exception e) {    // report any exceptions
+      System.err.println(e);
+    }
+
   }
   public static String num(int g[]) {
 	String retVal = "";
