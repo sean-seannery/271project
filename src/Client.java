@@ -60,7 +60,7 @@ public class Client {
       System.out.print("SENDING " + msg + " to Server:" + host + "...");
       msg.setSourceAddress("CLIENT");
       to_server.writeObject(msg); to_server.flush();
-      System.out.println("SENT" + msg);
+      System.out.println("SENT");
       ServerMessage line;
       
       while ((line = (ServerMessage) from_server.readObject()) != null) {

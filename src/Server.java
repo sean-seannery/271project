@@ -85,7 +85,7 @@ public class Server {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
 			
-			while (reader.readLine() != null) {
+			while (!Thread.interrupted()) {
 			
 				Socket connected_socket;
 							
@@ -106,10 +106,10 @@ public class Server {
 			System.out.println(" \n \n Shutting Down Server....");
 			socket.close();
 			
-			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	  
 		
 	}
 	
