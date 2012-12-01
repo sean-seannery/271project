@@ -100,7 +100,7 @@ public class Client {
     
     try {
         ServerSocket socket = new ServerSocket(3003);
-        while (true) {
+        for(int i = 0; i < 2; i++) {
                 
             Socket connected_socket;
             connected_socket = socket.accept();
@@ -110,7 +110,7 @@ public class Client {
 
             line = (ServerMessage) from_server.readObject();
             if(line != null) {
-                System.out.print("Reading " + line + " from Server");     
+                System.out.print("Message: " + line.getMessage() + " Type: " + line.getTypeName() + " from Server");     
             }
 
             connected_socket.close();                   
