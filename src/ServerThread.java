@@ -65,6 +65,16 @@ public abstract class ServerThread extends Thread{
             	    
 		        case ServerMessage.CLIENT_READ:
 		        	//read the file
+		        	String filename = "";
+		        	if (parentServer.isStatServer()) {
+		        		filename = "STATS.txt";
+		        	} else if (parentServer.isGradeServer()) {
+		        		filename = "GRADES.txt";
+		        	}
+		        	ServerMessage readResultsMsg = new ServerMessage(ServerMessage.CLIENT_READ, parentServer.readFile(filename));
+		        	readResultsMsg.setSourceAddress(socket.getInetAddress().getHostName());
+		        	sendMessage(socket.getInetAddress().getHostName(), 3003, readResultsMsg);
+		        	
 		        	break;
 		        case ServerMessage.CLIENT_APPEND:
 		        	//create a new ballot by incrementing current ballot by 1
@@ -217,7 +227,7 @@ public abstract class ServerThread extends Thread{
 		        	break;
 		        	
 		        case ServerMessage.TWOPHASE_COMMIT:
-		        	String filename = "";
+		        	filename = "";
 		        	if (parentServer.isGradeServer() ) {
 		        		filename = "GRADES.txt";
 		        	} else if (parentServer.isStatServer() )

@@ -6,6 +6,7 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -176,7 +177,7 @@ public class Server {
     		}
  
     	    BufferedWriter buffer = new BufferedWriter( new FileWriter(outfile.getName(),true) );
-    	    buffer.write(data);
+    	    buffer.write(data + "\n");
             buffer.close(); 
  
 	        System.out.println("WROTE TO FILE " + filename + ": " + data);
@@ -186,6 +187,33 @@ public class Server {
     		e.printStackTrace();
     		throw new IOException(e);
     	}
+	}
+	
+	public String readFile( String filename) {
+		String contents = "";
+		try{
+		
+			File outfile = new File(filename);
+ 
+ 
+    	    BufferedReader buffer = new BufferedReader( new FileReader(outfile) );
+    	    
+    	
+    	    String line = buffer.readLine();
+    	    while (line != null ) {
+    	    	contents += line;
+    	    	line = buffer.readLine();	    	
+    	    }
+    	    
+            buffer.close(); 
+ 
+	        return contents;
+ 
+    	}catch(IOException e){
+    		System.out.println("Error Writing Local File:");
+    		e.printStackTrace();
+    	}
+		 return contents;
 	}
 	
 	
