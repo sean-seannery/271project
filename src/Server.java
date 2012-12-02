@@ -214,7 +214,7 @@ public class Server {
     	
     	    String line = buffer.readLine();
     	    while (line != null ) {
-    	    	contents += line;
+    	    	contents += line + "\n";
     	    	line = buffer.readLine();	    	
     	    }
     	    

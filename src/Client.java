@@ -10,14 +10,14 @@ import java.util.Scanner;
 
 public class Client {
   public static void main(String[] args) {
-      if (args.length != 2) {
-        System.out.println("need 2 arguments");
+      if (args.length != 1) {
+        System.out.println("need APPEND or READ");
         System.exit(1);
       }
-      String grades_host = args[0];
+      String grades_host = Server.GRADE_SERVERS.get(0);
       String stats_host = Server.STAT_SERVERS.get(0);
       int port = 3000;
-      String command = args[1];
+      String command = args[0];
       
       ServerMessage grade_msg = new ServerMessage();
       ServerMessage stat_msg = new ServerMessage();
