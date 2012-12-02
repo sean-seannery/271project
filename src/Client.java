@@ -15,7 +15,7 @@ public class Client {
         System.exit(1);
       }
       String grades_host = args[0];
-      String stats_host = Server.GRADE_SERVERS.get(0);
+      String stats_host = Server.STAT_SERVERS.get(0);
       int port = 3000;
       String command = args[1];
       
