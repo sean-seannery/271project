@@ -48,23 +48,23 @@ public class Client {
       }
       
     //initiate contact with a grade server and get back the grade paxos leader
-      ServerMessage line = sendMessage(grades_host,port,prepare);
+      ServerMessage line = sendMessage(grades_host,port,prepare, true);
       if(line != null) {
           grades_host = line.getMessage();
           System.out.println("GRADES PAXOS LEADER IS: " + grades_host);     
         }
       
       //initiate contact with the stat server and get back the stat paxos leader
-      line = sendMessage(stats_host,port,prepare);
+      line = sendMessage(stats_host,port,prepare, true);
       if(line != null) {
           stats_host = line.getMessage();
           System.out.println("STATS PAXOS LEADER IS: " + stats_host);     
         }
       
       //send the grades and stats to their appropriate paxos leaders
-      sendMessage(grades_host,port,grade_msg);
+      sendMessage(grades_host,port,grade_msg, false);
       
-      sendMessage(stats_host,port,stat_msg);
+      sendMessage(stats_host,port,stat_msg, false);
       
        //listen on port 3003 for results of read or append.
     try {
@@ -89,7 +89,7 @@ public class Client {
 
   }
   
-  public static ServerMessage sendMessage(String host_addr, int port, ServerMessage myMsg) {
+  public static ServerMessage sendMessage(String host_addr, int port, ServerMessage myMsg, boolean expectReply) {
 	  try {
 	      InetAddress address = InetAddress.getByName(host_addr);
 	      System.out.print("Connecting to " + host_addr + "...");
@@ -108,7 +108,10 @@ public class Client {
 	      to_server.writeObject(myMsg); to_server.flush();
 	      System.out.println("SENT");
 	      
-	      ServerMessage retVal = (ServerMessage) from_server.readObject();
+	      ServerMessage retVal = null;
+	      if (expectReply){
+	    	  retVal = (ServerMessage) from_server.readObject();
+	      }
 	      from_server.close();
 	      to_server.close();
 	      socket.close();
