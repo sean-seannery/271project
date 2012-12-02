@@ -54,7 +54,7 @@ public class Server {
 		paxosLeaders = new ArrayList<String>();
 		currentAcceptNum = 0;
 		acceptValue = null;
-		processID = UUID.randomUUID().hashCode();
+		processID = Math.abs(UUID.randomUUID().hashCode());
 		currentBallotNumber = 0;
 		port = 3000;
 		isGradeServer = false;
