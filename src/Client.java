@@ -63,6 +63,7 @@ public class Client {
       
       //send the grades and stats to their appropriate paxos leaders
       sendMessage(grades_host,port,grade_msg);
+      
       sendMessage(stats_host,port,stat_msg);
       
        //listen on port 3003 for results of read or append.
@@ -108,6 +109,8 @@ public class Client {
 	      System.out.println("SENT");
 	      
 	      ServerMessage retVal = (ServerMessage) from_server.readObject();
+	      from_server.close();
+	      to_server.close();
 	      socket.close();
 	      return retVal;
 	     
