@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -38,6 +37,7 @@ public class Server {
 	private boolean isPaxosLeader;
 	private ArrayList<String> paxosLeaders;
 	private int paxosLeaderResponseCount;
+	private ServerSocket socket;
 
 	public static final ArrayList<String> StatServers = new ArrayList<String>(Arrays.asList("megatron.cs.ucsb.edu", "beavis.cs.ucsb.edu"));
 	public static final ArrayList<String> GradeServers = new ArrayList<String>(Arrays.asList("1.2.3.4",
@@ -70,28 +70,23 @@ public class Server {
 	}
 	
 	
+	/**
+	 *  Start the server
+	 */
 	public void start() {
 		System.out.println("Starting Server... ServerID=" + getProcessId());
-		ServerSocket socket;
+		
 		
 	    try {
-			socket = new ServerSocket(this.port);
+			this.socket = new ServerSocket(this.port);
 			
 			System.out.println("Server listening on " + socket.getInetAddress().getHostAddress() + ":" + port );
 			System.out.println("=============================================");
-			
-			
-
-	        // Create a buffered reader to stdin
-			//BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-
-			
+					
 			while (!Thread.interrupted()) {
 			
-				Socket connected_socket;
+				Socket connected_socket = socket.accept();
 				
-				connected_socket = socket.accept();
-								
 				ServerThread t;
 				if (this.isGradeServer) {
 					t = new GradeServerThread(this, connected_socket);
@@ -103,15 +98,22 @@ public class Server {
 							
 			}
 			
-			System.out.println("=============================================");
-			System.out.println(" \n \n Shutting Down Server....");
-			socket.close();
-			
+			stop();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
+	}
+	
+	public void stop(){
+		System.out.println("=============================================");
+		System.out.println(" \n \n Shutting Down Server....");
+		try {
+			this.socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	  
-		
+		System.exit(0);
 	}
 	
 	/* processArgs
@@ -165,6 +167,11 @@ public class Server {
 	}
 	
 	
+	/**
+	 * @param data string that you want to append to a file
+	 * @param filename file you want to write to.
+	 * @throws IOException
+	 */
 	public synchronized void appendFile(String data, String filename) throws IOException{
 			
 		try{
@@ -189,15 +196,15 @@ public class Server {
     	}
 	}
 	
+	/**
+	 * @param filename 
+	 * @return contents of the file name specified
+	 */
 	public String readFile( String filename) {
 		String contents = "";
 		try{
-		
 			File outfile = new File(filename);
- 
- 
-    	    BufferedReader buffer = new BufferedReader( new FileReader(outfile) );
-    	    
+    	    BufferedReader buffer = new BufferedReader( new FileReader(outfile) );    	    
     	
     	    String line = buffer.readLine();
     	    while (line != null ) {
@@ -207,8 +214,6 @@ public class Server {
     	    
             buffer.close(); 
  
-	        return contents;
- 
     	}catch(IOException e){
     		System.out.println("Error Writing Local File:");
     		e.printStackTrace();
@@ -216,6 +221,7 @@ public class Server {
 		 return contents;
 	}
 	
+	/*********************** GETTERS AND SETTERS **************************/
 	
 	public Hashtable<Integer,ArrayList<ServerMessage> > getMessageHash() {
 		return messageHash;
@@ -285,4 +291,7 @@ public class Server {
 	public synchronized void addPaxosLeaders(String newleader) {
 		this.paxosLeaders.add(newleader);
 	}
+	
 }
+
+

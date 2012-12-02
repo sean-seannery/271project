@@ -13,6 +13,7 @@ public abstract class ServerThread extends Thread{
 	private ObjectInputStream inputStream;
 	private ObjectOutputStream outputStream;
 	private Server parentServer;
+	protected String fileName;
 	
 	public ServerThread(Server psrv, Socket skt){
 		this.socket = skt;
@@ -64,14 +65,8 @@ public abstract class ServerThread extends Thread{
                 	break;
             	    
 		        case ServerMessage.CLIENT_READ:
-		        	//read the file
-		        	String filename = "";
-		        	if (parentServer.isStatServer()) {
-		        		filename = "STATS.txt";
-		        	} else if (parentServer.isGradeServer()) {
-		        		filename = "GRADES.txt";
-		        	}
-		        	ServerMessage readResultsMsg = new ServerMessage(ServerMessage.CLIENT_READ, parentServer.readFile(filename));
+		        	//read the file (set in child class)
+		        	ServerMessage readResultsMsg = new ServerMessage(ServerMessage.CLIENT_READ, parentServer.readFile(fileName));
 		        	readResultsMsg.setSourceAddress(socket.getInetAddress().getHostName());
 		        	sendMessage(socket.getInetAddress().getHostName(), 3003, readResultsMsg);
 		        	
@@ -227,14 +222,8 @@ public abstract class ServerThread extends Thread{
 		        	break;
 		        	
 		        case ServerMessage.TWOPHASE_COMMIT:
-		        	filename = "";
-		        	if (parentServer.isGradeServer() ) {
-		        		filename = "GRADES.txt";
-		        	} else if (parentServer.isStatServer() )
-		        	{
-		        		filename = "STATS.txt";
-		        	}
-		        	parentServer.appendFile(msg.getMessage(), filename);
+		        	
+		        	parentServer.appendFile(msg.getMessage(), fileName);
 		        	//write any changes
 		        	break;
 	        
@@ -281,8 +270,6 @@ public abstract class ServerThread extends Thread{
 		System.out.println("REPLYING " + msg + " to Server:" + socket.getInetAddress().getHostAddress() + "...");
 		
 		 try {
-		      
-
 		      outputStream.writeObject(msg); outputStream.flush();
 		      System.out.println("....SENT");
 		 } catch (IOException e){

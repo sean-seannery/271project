@@ -133,7 +133,6 @@ public class Client {
   }
   
   public static String calc(int g[], double s[]) {
-	
     int min = g[0];
     int max = g[0];
     double sum = g[0]; 
