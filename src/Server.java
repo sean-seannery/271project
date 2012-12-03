@@ -22,14 +22,14 @@ import java.util.UUID;
  */
 public class Server {
 	
-	public static final ArrayList<String> STAT_SERVERS = new ArrayList<String>(Arrays.asList("ec2-54-246-64-97.eu-west-1.compute.amazonaws.com", 
-																							"ec2-107-21-67-13.compute-1.amazonaws.com",
-																							"ec2-54-245-146-112.us-west-2.compute.amazonaws.com"));
-	public static final ArrayList<String> GRADE_SERVERS = new ArrayList<String>(Arrays.asList("ec2-46-137-15-54.eu-west-1.compute.amazonaws.com",
-																							"ec2-54-234-21-221.compute-1.amazonaws.com",
-																							"ec2-50-112-47-84.us-west-2.compute.amazonaws.com"));
-	public static final String STAT_2PC_LEADER = "ec2-107-21-67-13.compute-1.amazonaws.com";
-	public static final String GRADE_2PC_LEADER = "ec2-54-234-21-221.compute-1.amazonaws.com";
+	public static final ArrayList<String> STAT_SERVERS = new ArrayList<String>(Arrays.asList("10.72.239.40", 
+																							"10.227.198.52",
+																							"10.244.142.175"));
+	public static final ArrayList<String> GRADE_SERVERS = new ArrayList<String>(Arrays.asList("10.202.151.203",
+																							"10.48.211.189",
+																							"10.244.29.215"));
+	public static final String STAT_2PC_LEADER = "10.227.198.52";
+	public static final String GRADE_2PC_LEADER = "10.48.211.189";
 
 	private int port;
 	private boolean isGradeServer;
