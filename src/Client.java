@@ -73,7 +73,7 @@ public class Client {
         
         int i = 0;
         //only expecting 2 responses
-        while (i<2) {
+        while (true) {
             
             Socket connected_socket;
             connected_socket = socket.accept();
