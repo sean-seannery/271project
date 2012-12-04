@@ -29,13 +29,13 @@ public class Server {
 	public static final ArrayList<String> GRADE_SERVERS = new ArrayList<String>(Arrays.asList("ec2-79-125-51-183.eu-west-1.compute.amazonaws.com",
 																							"ec2-54-234-21-221.compute-1.amazonaws.com",
 																							"ec2-50-112-47-84.us-west-2.compute.amazonaws.com"));
-    private static final Hashtable<String,String> PRIVATE_TO_PUBLIC = new Hashtable<String,String>() 
-    {{     put("ip-10-227-198-52.eu-west-1.compute.internal",      "ec2-54-246-64-97.eu-west-1.compute.amazonaws.com");     
-       put("ip-10-72-239-40.ec2.internal",      "ec2-107-21-67-13.compute-1.amazonaws.com");     
+   /* private static final Hashtable<String,String> PRIVATE_TO_PUBLIC = new Hashtable<String,String>() 
+    {{ put("ip-10-227-198-52.eu-west-1.compute.internal",      "ec2-54-246-64-97.eu-west-1.compute.amazonaws.com");     
+       put("ip-10-72-239-40.ec2.internal",                     "ec2-107-21-67-13.compute-1.amazonaws.com");     
        put("ip-10-244-142-175.us-west-2.compute.internal",     "ec2-54-245-146-112.us-west-2.compute.amazonaws.com");     
-       put("ip-10-226-118-242.eu-west-1.compute.internal", "ec2-79-125-51-183.eu-west-1.compute.amazonaws.com");     
-       put("ip-10-202-151-203.ec2.internal",    "ec2-54-234-21-221.compute-1.amazonaws.com");     
-       put("ip-10-244-29-215.us-west-2.compute.internal",    "ec2-50-112-47-84.us-west-2.compute.amazonaws.com");  }};               
+       put("ip-10-226-118-242.eu-west-1.compute.internal",     "ec2-79-125-51-183.eu-west-1.compute.amazonaws.com");     
+       put("ip-10-202-151-203.ec2.internal",                   "ec2-54-234-21-221.compute-1.amazonaws.com");     
+       put("ip-10-244-29-215.us-west-2.compute.internal",      "ec2-50-112-47-84.us-west-2.compute.amazonaws.com");  }};        */       
 	public static final String STAT_2PC_LEADER = "ec2-107-21-67-13.compute-1.amazonaws.com";
 	public static final String GRADE_2PC_LEADER = "ec2-54-234-21-221.compute-1.amazonaws.com";
 	private String serverPublicIP;
@@ -328,9 +328,9 @@ public class Server {
 		this.myTwoPCCoordinator = myTwoPCCoordinator;
 	}
     
-    public String getPublicHash(String key) {
+  /*  public String getPublicHash(String key) {
 		return PRIVATE_TO_PUBLIC.get(key);
-	}
+	}*/
     
     public String getServerPublicIP() {
 		return serverPublicIP;

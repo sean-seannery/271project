@@ -64,19 +64,22 @@ public class Client {
         }
       
       //send the grades and stats to their appropriate paxos leaders
-      sendMessage(grades_host,port,grade_msg, false);
-      
+      sendMessage(grades_host,port,grade_msg, false);     
       sendMessage(stats_host,port,stat_msg, false);
       
        //listen on port 3003 for results of read or append.
     try {
         ServerSocket socket = new ServerSocket(3003);
-        while (true) {
-                
+        
+        int i = 0;
+        //only expecting 2 responses
+        while (i<2) {
+            
             Socket connected_socket;
             connected_socket = socket.accept();
             ClientThread t = new ClientThread(connected_socket);
             t.run();
+            i++;
                           
         }
     }
@@ -86,21 +89,19 @@ public class Client {
 
   }
   
+  //creates a new thread to listen for responses.  This needs to be a thread in case a message returns concurrently with another.
   public static class ClientThread extends Thread {
 	  Socket mySocket;
-	  public ClientThread(Socket skt){
-		  mySocket = skt;
-	  }
+	  public ClientThread(Socket skt){	  mySocket = skt;	  }
 	  
 	  public void run() {
 		  try {
-		  ObjectInputStream from_server = new ObjectInputStream(mySocket.getInputStream());
-
-          ServerMessage line = (ServerMessage) from_server.readObject();
-          if(line != null) {
-              System.out.print("Message: " + line.getMessage() + " Type: " + line.getTypeName() + " from Server" + mySocket.getInetAddress().getHostAddress());     
-          }
-          mySocket.close();     
+			  ObjectInputStream from_server = new ObjectInputStream(mySocket.getInputStream());
+	          ServerMessage line = (ServerMessage) from_server.readObject();
+	          if(line != null) {
+	              System.out.println("\n \n Message: " + line.getMessage() + " Type: " + line.getTypeName() + " from Server" + mySocket.getInetAddress().getHostAddress());     
+	          }
+	          mySocket.close();     
 		  } catch (Exception e) {			  e.printStackTrace();		  }
 	  }
   }
