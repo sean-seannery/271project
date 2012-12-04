@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -325,9 +326,24 @@ public class Server {
 		this.myTwoPCCoordinator = myTwoPCCoordinator;
 	}
     
-    public Hashtable<String, String> getPublicHash() {
-		return PRIVATE_TO_PUBLIC;
+    public String getPublicHash(String key) {
+		return PRIVATE_TO_PUBLIC.get(key);
 	}
+    
+    public static String getIP() throws IOException, InterruptedException {
+        Process p = Runtime.getRuntime().exec("wget -qO- http://instance-data/latest/meta-data/public-ipv4");
+        int returnCode = p.waitFor();
+        if ( returnCode == 0 ) {
+            BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String ip = r.readLine();
+            r.close();
+            return ip;
+        }
+        else {
+            //handle error
+            return null;
+        }
+    }
 	
 }
 
