@@ -71,24 +71,38 @@ public class Client {
        //listen on port 3003 for results of read or append.
     try {
         ServerSocket socket = new ServerSocket(3003);
-        for(int i = 0; i < 2; i++) {
+        while (true) {
                 
             Socket connected_socket;
             connected_socket = socket.accept();
-            ObjectInputStream from_server = new ObjectInputStream(connected_socket.getInputStream());
-
-            line = (ServerMessage) from_server.readObject();
-            if(line != null) {
-                System.out.print("Message: " + line.getMessage() + " Type: " + line.getTypeName() + " from Server");     
-            }
-
-            connected_socket.close();                   
+            ClientThread t = new ClientThread(connected_socket);
+            t.run();
+                          
         }
     }
     catch (Exception e) {    // report any exceptions
       System.err.println(e);
     }
 
+  }
+  
+  public static class ClientThread extends Thread {
+	  Socket mySocket;
+	  public ClientThread(Socket skt){
+		  mySocket = skt;
+	  }
+	  
+	  public void run() {
+		  try {
+		  ObjectInputStream from_server = new ObjectInputStream(mySocket.getInputStream());
+
+          ServerMessage line = (ServerMessage) from_server.readObject();
+          if(line != null) {
+              System.out.print("Message: " + line.getMessage() + " Type: " + line.getTypeName() + " from Server" + mySocket.getInetAddress().getHostAddress());     
+          }
+          mySocket.close();     
+		  } catch (Exception e) {			  e.printStackTrace();		  }
+	  }
   }
   
   public static ServerMessage sendMessage(String host_addr, int port, ServerMessage myMsg, boolean expectReply) {
