@@ -59,10 +59,10 @@ public abstract class ServerThread extends Thread{
 	                	for (int i = 0; i < this.peerServers.size(); i++){
 		        			//ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getLocalAddress().getCanonicalHostName(), socket.getLocalAddress().getCanonicalHostName() );
                             System.out.println("Is this the right string: " + pHash.get(socket.getLocalAddress().getCanonicalHostName()) );
-                            ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, pHash.get(socket.getInetAddress().toString())  , pHash.get(socket.getInetAddress().toString())  );
+                            ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, pHash.get(socket.getLocalAddress().getCanonicalHostName())  , pHash.get(socket.getLocalAddress().getCanonicalHostName())  );
 			        		sendMessage(this.peerServers.get(i), 3000, leaderMsg);
 			        	}
-	                	reply(new ServerMessage(ServerMessage.LEADER_RESPONSE, pHash.get(socket.getInetAddress().toString())  ));
+	                	reply(new ServerMessage(ServerMessage.LEADER_RESPONSE, pHash.get(socket.getLocalAddress().getCanonicalHostName())  ));
 
                 	} else {
                 		
