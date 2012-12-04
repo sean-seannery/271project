@@ -80,6 +80,7 @@ public class Client {
             ClientThread t = new ClientThread(connected_socket);
             t.run();
             i++;
+            connected_socket.close();
                           
         }
     }
