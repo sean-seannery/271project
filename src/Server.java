@@ -96,7 +96,7 @@ public class Server {
 	    try {
 			this.socket = new ServerSocket(this.port);
 			
-			System.out.println("Server listening on " + socket.getInetAddress().getHostAddress() + ":" + port );
+			System.out.println("Server listening on " + serverPublicIP + ":" + port );
 			System.out.println("=============================================");
 					
 			while (!Thread.interrupted()) {

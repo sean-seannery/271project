@@ -38,6 +38,7 @@ public class ServerMessage implements Serializable {
 		setSourceAddress(src);
 		ballotNumber = -1;
 		ballotProcID = -1;
+		lastAcceptNumber = -1;
 		lastAcceptVal = null;
 	}
 	
@@ -46,6 +47,7 @@ public class ServerMessage implements Serializable {
 		setType(newType);
 		ballotNumber = -1;
 		ballotProcID = -1;
+		lastAcceptNumber = -1;
 		lastAcceptVal = null;
 	}
 	
@@ -55,6 +57,7 @@ public class ServerMessage implements Serializable {
 		setSourceAddress(null);
 		ballotNumber = -1;
 		ballotProcID = -1;
+		lastAcceptNumber = -1;
 		lastAcceptVal = null;
 	}
 	
@@ -64,13 +67,17 @@ public class ServerMessage implements Serializable {
 		setSourceAddress(null);
 		ballotNumber = -1;
 		ballotProcID = -1;
+		lastAcceptNumber = -1;
 		lastAcceptVal = null;
 	}
 	
 	public String toString(){
 	
 		String retVal;
-		retVal = "ServerMessage{type:" + this.getTypeName() + " msg:" + this.getMessage();
+		retVal = "ServerMessage{type:" + this.getTypeName();
+		if (this.msg != null){
+			retVal += " msg:" + this.getMessage();
+		}
 		if (sourceAddress != null){
 			retVal += " source:"+ getSourceAddress();
 		}
@@ -87,7 +94,7 @@ public class ServerMessage implements Serializable {
 			retVal += " lastAcptVal:"+ lastAcceptVal;
 		}
 		
-		return retVal;
+		return retVal + " }";
 	}
 
 	public String getTypeName() {
