@@ -53,15 +53,15 @@ public abstract class ServerThread extends Thread{
             switch (msg.getType()) {
             
                 case ServerMessage.CLIENT_GET_LEADER:
-                	
+                	Hashtable<String, String> pHash = parentServer.getPublicHash();
                 	if (parentServer.getPaxosLeaders().size() == 0) {
                 		parentServer.setPaxosLeader(true);
 	                	for (int i = 0; i < this.peerServers.size(); i++){
 		        			//ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getLocalAddress().getCanonicalHostName(), socket.getLocalAddress().getCanonicalHostName() );
-                            ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getInetAddress().toString()  , socket.getInetAddress().toString()  );
+                            ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, pHash.get(socket.getInetAddress().toString())  , pHash.get(socket.getInetAddress().toString())  );
 			        		sendMessage(this.peerServers.get(i), 3000, leaderMsg);
 			        	}
-	                	reply(new ServerMessage(ServerMessage.LEADER_RESPONSE, socket.getInetAddress().toString()  ));
+	                	reply(new ServerMessage(ServerMessage.LEADER_RESPONSE, pHash.get(socket.getInetAddress().toString())  ));
 
                 	} else {
                 		
