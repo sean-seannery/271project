@@ -75,11 +75,7 @@ public abstract class ServerThread extends Thread{
 		        case ServerMessage.CLIENT_READ:
 		        	//read the file (set in child class)
 		        	ServerMessage readResultsMsg = new ServerMessage(ServerMessage.CLIENT_READ, parentServer.readFile(fileName));
-		        	String public_host = "";
-                    public_host = parentServer.getServerPublicIP();
-              
-                    readResultsMsg.setSourceAddress(msg.getSourceAddress());
-		        	sendMessage(public_host, 3003, readResultsMsg);
+                    sendMessage(socket.getInetAddress().getHostAddress(), 3003, readResultsMsg);
 		        	
 		        	break;
 		        case ServerMessage.CLIENT_APPEND:
@@ -90,9 +86,7 @@ public abstract class ServerThread extends Thread{
 		        		//send
 		        	}
 		        	
-                    public_host = "";
-                   
-                        public_host = parentServer.getServerPublicIP();
+                   String public_host = parentServer.getServerPublicIP();
                	        	
 		        	parentServer.setCurrentBallotNumber(parentServer.getCurrentBallotNumber()+1);
 		        	ServerMessage ballotMsg = new ServerMessage(ServerMessage.PAXOS_PREPARE, msg.getMessage(), public_host );
