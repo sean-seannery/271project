@@ -226,7 +226,7 @@ public abstract class ServerThread extends Thread{
 		        	
 		        case ServerMessage.TWOPHASE_ABORT:
 		        	//cancel the write changes
-		        	parentServer.appendFile("ABORT:"+msg.getMessage(), "REDO.log");
+		        	parentServer.appendFile("ABORT:"+msg.getMessage(), "/home/ubuntu/REDO.log");
 		        	//tell client we aborted the write
 		        	sendMessage(msg.getSourceAddress(), 3003,new ServerMessage(ServerMessage.TWOPHASE_ABORT, "ABORTED WRITING: " + msg.getMessage()) );
 		        	
