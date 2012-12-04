@@ -75,7 +75,7 @@ public abstract class ServerThread extends Thread{
 		        case ServerMessage.CLIENT_READ:
 		        	//read the file (set in child class)
 		        	ServerMessage readResultsMsg = new ServerMessage(ServerMessage.CLIENT_READ, parentServer.readFile(fileName));
-                    sendMessage(socket.getInetAddress().getHostAddress(), 3003, readResultsMsg);
+                    sendMessage(msg.getSourceAddress(), 3003, readResultsMsg);
 		        	
 		        	break;
 		        case ServerMessage.CLIENT_APPEND:
