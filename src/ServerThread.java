@@ -137,8 +137,10 @@ public abstract class ServerThread extends Thread{
 		        	parentServer.setMessageHash(hash);
 
 		        	//check to see if we have gotten a majority of responses... if not, do nothing
-		        	System.out.println("  --ACK_RCVD:" + ballot_msgs.size() + " out of AKS_NEEDED: " + this.peerServers.size()/2 );
-		        	if(ballot_msgs.size() > this.peerServers.size()/2)
+		        	System.out.println("  --ACK_RCVD:" + ballot_msgs.size() + " out of AKS_NEEDED: " + ((double) this.peerServers.size())/2 );
+		        	
+		        	//sprocess ack messages once we get a majority but ignore any messages after majority is recieved
+		        	if(ballot_msgs.size() > ((double) this.peerServers.size())/2 && ballot_msgs.size() <= (((double) this.peerServers.size())/2) + 1)
 		        	{
 		        		//clear the ack count so this doesnt run twice.
 		        		//hash.put(msg.getBallotNumber(), new ArrayList<ServerMessage>());
