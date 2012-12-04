@@ -105,7 +105,6 @@ public class Client {
 	      
 	      // send command to server, then read and print lines until
 	      // the server closes the connection
-	      myMsg.setSourceAddress("CLIENT");
 	      System.out.print("SENDING " + myMsg + " to Server:" + host_addr + "...");
 	      to_server.writeObject(myMsg); to_server.flush();
 	      System.out.println("SENT");

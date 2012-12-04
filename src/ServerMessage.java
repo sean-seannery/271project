@@ -68,8 +68,26 @@ public class ServerMessage implements Serializable {
 	}
 	
 	public String toString(){
+	
+		String retVal;
+		retVal = "ServerMessage{type:" + this.getTypeName() + " msg:" + this.getMessage();
+		if (sourceAddress != null){
+			retVal += " source:"+ getSourceAddress();
+		}
+		if (ballotNumber != -1){
+			retVal += " ballot#:"+ ballotNumber;
+		}
+		if (ballotProcID != -1){
+			retVal += " pid#:"+ ballotProcID;
+		}
+		if (lastAcceptNumber != -1){
+			retVal += " lastAcptBallot#:"+ lastAcceptNumber;
+		}
+		if (lastAcceptVal != null) {
+			retVal += " lastAcptVal:"+ lastAcceptVal;
+		}
 		
-		return "ServerMessage{source:" + getSourceAddress() + " type:" + this.getTypeName() + " msg:" + this.getMessage() + "}";
+		return retVal;
 	}
 
 	public String getTypeName() {
