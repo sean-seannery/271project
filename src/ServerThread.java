@@ -58,6 +58,7 @@ public abstract class ServerThread extends Thread{
                 		parentServer.setPaxosLeader(true);
 	                	for (int i = 0; i < this.peerServers.size(); i++){
 		        			//ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getLocalAddress().getCanonicalHostName(), socket.getLocalAddress().getCanonicalHostName() );
+                            System.out.println(" Exception reading Streams: " + pHash.get(socket.getInetAddress().toString()) );
                             ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, pHash.get(socket.getInetAddress().toString())  , pHash.get(socket.getInetAddress().toString())  );
 			        		sendMessage(this.peerServers.get(i), 3000, leaderMsg);
 			        	}
