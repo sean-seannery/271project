@@ -38,6 +38,7 @@ public class Server {
        put("ip-10-244-29-215.us-west-2.compute.internal",    "ec2-50-112-47-84.us-west-2.compute.amazonaws.com");  }};               
 	public static final String STAT_2PC_LEADER = "ec2-107-21-67-13.compute-1.amazonaws.com";
 	public static final String GRADE_2PC_LEADER = "ec2-54-234-21-221.compute-1.amazonaws.com";
+	private String serverPublicIP;
 
 	private int port;
 	private boolean isGradeServer;
@@ -62,6 +63,7 @@ public class Server {
 	
 
 	public Server() {
+		serverPublicIP = Server.getIP();
 		paxosLeaderResponseCount = 0;
 		paxosLeaders = new ArrayList<String>();
 		currentAcceptNum = 0;
@@ -330,19 +332,34 @@ public class Server {
 		return PRIVATE_TO_PUBLIC.get(key);
 	}
     
-    public static String getIP() throws IOException, InterruptedException {
-        Process p = Runtime.getRuntime().exec("wget -qO- http://instance-data/latest/meta-data/public-ipv4");
-        int returnCode = p.waitFor();
-        if ( returnCode == 0 ) {
-            BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String ip = r.readLine();
-            r.close();
-            return ip;
-        }
-        else {
-            //handle error
-            return null;
-        }
+    public String getServerPublicIP() {
+		return serverPublicIP;
+	}
+
+	public static String getIP()  {
+    	
+		String ip = "";
+    	
+    	try {
+	        Process p = Runtime.getRuntime().exec("wget -qO- http://instance-data/latest/meta-data/public-ipv4");
+	        int returnCode = p.waitFor();
+	        if ( returnCode == 0 ) {
+	            BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+	            ip = r.readLine();
+	            r.close();
+	            
+	        }
+	        else {
+	            //handle error
+	            return null;
+	        }
+    	} catch (Exception e) {
+    		System.out.println("Error getting public ip:");
+    		e.printStackTrace();
+    		
+    	}
+    	
+    	return ip;
     }
 	
 }

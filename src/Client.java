@@ -23,6 +23,8 @@ public class Client {
       ServerMessage stat_msg = new ServerMessage();
       ServerMessage prepare = new ServerMessage();
       prepare.setType(ServerMessage.CLIENT_GET_LEADER);
+      grade_msg.setSourceAddress(Server.getIP());
+      stat_msg.setSourceAddress(Server.getIP());
       
       if(command.equals("APPEND")){
     	  grade_msg.setType(ServerMessage.CLIENT_APPEND);

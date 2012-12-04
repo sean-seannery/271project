@@ -55,14 +55,9 @@ public abstract class ServerThread extends Thread{
                 case ServerMessage.CLIENT_GET_LEADER:
                 	if (parentServer.getPaxosLeaders().size() == 0) {
                         String public_host = "";
-                        try{
-                            public_host = parentServer.getIP();
-                        }catch(InterruptedException e){
-                            System.out.println("Error Getting IP:");
-                            e.printStackTrace();
-                            throw new IOException(e);
-                        }
-                		parentServer.setPaxosLeader(true);
+                     
+                        public_host = parentServer.getServerPublicIP();
+                        parentServer.setPaxosLeader(true);
 	                	for (int i = 0; i < this.peerServers.size(); i++){
                             ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, public_host, public_host);
 			        		sendMessage(this.peerServers.get(i), 3000, leaderMsg);
@@ -81,14 +76,10 @@ public abstract class ServerThread extends Thread{
 		        	//read the file (set in child class)
 		        	ServerMessage readResultsMsg = new ServerMessage(ServerMessage.CLIENT_READ, parentServer.readFile(fileName));
 		        	String public_host = "";
-                    try{
-                        public_host = parentServer.getIP();
-                    }catch(InterruptedException e){
-                        System.out.println("Error Getting IP:");
-                        e.printStackTrace();
-                        throw new IOException(e);
-                    }
-                    readResultsMsg.setSourceAddress(public_host);
+                    
+                        public_host = parentServer.getServerPublicIP();
+              
+                    readResultsMsg.setSourceAddress(msg.getSourceAddress());
 		        	sendMessage(public_host, 3003, readResultsMsg);
 		        	
 		        	break;
@@ -101,18 +92,14 @@ public abstract class ServerThread extends Thread{
 		        	}
 		        	
                     public_host = "";
-                    try{
-                        public_host = parentServer.getIP();
-                    }catch(InterruptedException e){
-                        System.out.println("Error Getting IP:");
-                        e.printStackTrace();
-                        throw new IOException(e);
-                    }		        	
+                   
+                        public_host = parentServer.getServerPublicIP();
+               	        	
 		        	parentServer.setCurrentBallotNumber(parentServer.getCurrentBallotNumber()+1);
 		        	ServerMessage ballotMsg = new ServerMessage(ServerMessage.PAXOS_PREPARE, msg.getMessage(), public_host );
 		        	ballotMsg.setBallotNumber(parentServer.getCurrentBallotNumber());
 		        	ballotMsg.setBallotProcID(parentServer.getProcessId());
-		        	ballotMsg.setSourceAddress(public_host);
+		        	ballotMsg.setSourceAddress(msg.getSourceAddress());
 	        	
 		        	//send to all other stat or grade servers
 		        	for (int i = 0; i < this.peerServers.size(); i++){
@@ -130,13 +117,9 @@ public abstract class ServerThread extends Thread{
 		        		parentServer.setCurrentBallotNumber(msg.getBallotNumber());
 		        		//send the ack message with the current ballot, the last accepted ballot, the current value.
 		        		public_host = "";
-                        try{
-                            public_host = parentServer.getIP();
-                        }catch(InterruptedException e){
-                            System.out.println("Error Getting IP:");
-                            e.printStackTrace();
-                            throw new IOException(e);
-                        }		        	
+                        
+                            public_host = parentServer.getServerPublicIP();
+                              	
 		        		ServerMessage ackMessage = new ServerMessage(ServerMessage.PAXOS_ACK, msg.getMessage(), public_host );
 		        		ackMessage.setBallotNumber(parentServer.getCurrentBallotNumber());
 		        		ackMessage.setLastAcceptNumber(parentServer.getCurrentAcceptNum());
@@ -163,14 +146,14 @@ public abstract class ServerThread extends Thread{
 		        	//check to see if we have gotten a majority of responses... if not, do nothing
 		        	if(ballot_msgs.size() > this.peerServers.size()/2)
 		        	{
+		        		//clear the ack count so this doesnt run twice.
+		        		hash.put(msg.getBallotNumber(), null);
+			        	parentServer.setMessageHash(hash);
+			        	
 		        		public_host = "";
-                        try{
-                            public_host = parentServer.getIP();
-                        }catch(InterruptedException e){
-                            System.out.println("Error Getting IP:");
-                            e.printStackTrace();
-                            throw new IOException(e);
-                        }		       
+                        
+                            public_host = parentServer.getServerPublicIP();
+                        	       
         				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, msg.getMessage() ,public_host);
         				acceptMsg.setBallotNumber(parentServer.getCurrentBallotNumber());
         				acceptMsg.setSourceAddress(msg.getSourceAddress());
@@ -303,19 +286,8 @@ public abstract class ServerThread extends Thread{
 	}
 	
 	private void reply(ServerMessage msg){
-		
-        String public_host = "";
-        try{
-            public_host = parentServer.getIP();
-        }catch(IOException e ){
-            System.out.println("Error Getting IP:");
-            e.printStackTrace();
-        }catch(InterruptedException e) {		 
-            System.out.println("Error Getting IP:");
-            e.printStackTrace();
-        }
-                        
-		System.out.println("REPLYING " + msg + " to Server:" + public_host + "...");
+		                       
+		System.out.println("REPLYING " + msg + " to Server:" + socket.getInetAddress().getHostAddress() + "...");
 		
 		 try {
 		      outputStream.writeObject(msg); outputStream.flush();
