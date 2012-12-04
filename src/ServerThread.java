@@ -147,12 +147,10 @@ public abstract class ServerThread extends Thread{
 		        	if(ballot_msgs.size() > this.peerServers.size()/2)
 		        	{
 		        		//clear the ack count so this doesnt run twice.
-		        		hash.put(msg.getBallotNumber(), new ArrayList<ServerMessage>());
-			        	parentServer.setMessageHash(hash);
+		        		//hash.put(msg.getBallotNumber(), new ArrayList<ServerMessage>());
+			        	//parentServer.setMessageHash(hash);
 			        	
-		        		public_host = "";
-                        
-                            public_host = parentServer.getServerPublicIP();
+                        public_host = parentServer.getServerPublicIP();
                         	       
         				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, msg.getMessage() ,public_host);
         				acceptMsg.setBallotNumber(parentServer.getCurrentBallotNumber());
