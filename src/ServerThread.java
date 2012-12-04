@@ -124,7 +124,7 @@ public abstract class ServerThread extends Thread{
 		        		ackMessage.setLastAcceptNumber(parentServer.getCurrentAcceptNum());
 		        		ackMessage.setLastAcceptVal(parentServer.getAcceptValue());
 		        		ackMessage.setSourceAddress(msg.getSourceAddress());
-		        		sendMessage(msg.getSourceAddress(), 3000, ackMessage);
+		        		reply( ackMessage);
 		        	
 		        	}
 		        	break;
