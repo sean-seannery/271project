@@ -184,7 +184,7 @@ public abstract class ServerThread extends Thread{
 		        case ServerMessage.TWOPHASE_VOTE_REQUEST:
 		        	//attempt to write to redo log
 		        	try {
-		        		parentServer.appendFile("APPEND:"+msg.getMessage(), "/home/ubuntu/REDO.log");		        		
+		        		parentServer.appendFile("APPEND:"+msg.getMessage(), "REDO.log");		        		
 		        	} catch (IOException e){
 		        		//reply no
 		        		ServerMessage replyNo = new ServerMessage(ServerMessage.TWOPHASE_VOTE_NO, msg.getMessage());
@@ -230,7 +230,7 @@ public abstract class ServerThread extends Thread{
 		        	
 		        case ServerMessage.TWOPHASE_ABORT:
 		        	//cancel the write changes
-		        	parentServer.appendFile("ABORT:"+msg.getMessage(), "/home/ubuntu/REDO.log");
+		        	parentServer.appendFile("ABORT:"+msg.getMessage(), "REDO.log");
 		        	//tell client we aborted the write
 		        	sendMessage(msg.getSourceAddress(), 3003,new ServerMessage(ServerMessage.TWOPHASE_ABORT, "ABORTED WRITING: " + msg.getMessage()) );
 		        	

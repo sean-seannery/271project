@@ -195,9 +195,9 @@ public class Server {
 	public synchronized void appendFile(String data, String filename) throws IOException{
 			
 		try{
-		
-			File outfile = new File(filename);
- 
+		    File dir = new File ( "/home/ubuntu");
+			File outfile = new File(dir, filename);
+			
     		//if file doesnt exists, then create it
     		if(!outfile.exists()){
     			outfile.createNewFile();
@@ -207,7 +207,7 @@ public class Server {
     	    buffer.write(data + "\n");
             buffer.close(); 
  
-	        System.out.println("WROTE TO FILE " + filename + ": " + data);
+	        System.out.println("WROTE TO FILE " + outfile.getAbsolutePath() + ": " + data);
  
     	}catch(IOException e){
     		System.out.println("Error Writing Local File:");
@@ -223,9 +223,10 @@ public class Server {
 	public String readFile( String filename) {
 		String contents = "";
 		try{
-			File outfile = new File(filename);
+			File dir = new File ( "/home/ubuntu");
+			File outfile = new File(dir, filename);
     	    BufferedReader buffer = new BufferedReader( new FileReader(outfile) );    	    
-    	    System.out.println("Reading Local File: " + filename);
+    	    System.out.println("Reading Local File: " + outfile.getAbsolutePath());
     	    String line = buffer.readLine();
     	    while (line != null ) {
     	    	contents += line + "\n";
