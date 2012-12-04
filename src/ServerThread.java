@@ -137,6 +137,7 @@ public abstract class ServerThread extends Thread{
 		        	parentServer.setMessageHash(hash);
 
 		        	//check to see if we have gotten a majority of responses... if not, do nothing
+		        	System.out.println("  --ACK_RCVD:" + ballot_msgs.size() + " out of AKS_NEEDED: " + this.peerServers.size()/2 );
 		        	if(ballot_msgs.size() > this.peerServers.size()/2)
 		        	{
 		        		//clear the ack count so this doesnt run twice.
@@ -158,7 +159,7 @@ public abstract class ServerThread extends Thread{
 		        	
 		        	parentServer.setPaxosLeaderResponseCount(parentServer.getPaxosLeaderResponseCount() + 1);
 		
-		        	
+		        	System.out.println("  --ACPT_RCVD:" + parentServer.getPaxosLeaderResponseCount() + " out of ACPT_NEEDED: " + parentServer.getPaxosLeaders().size() );
 		        	if (parentServer.getPaxosLeaderResponseCount() == parentServer.getPaxosLeaders().size()){
 		        		//reset response count for the next query
 		        		parentServer.setPaxosLeaderResponseCount(0);
@@ -181,7 +182,7 @@ public abstract class ServerThread extends Thread{
 		        case ServerMessage.TWOPHASE_VOTE_REQUEST:
 		        	//attempt to write to redo log
 		        	try {
-		        		parentServer.appendFile("APPEND:"+msg.getMessage(), "REDO.log");		        		
+		        		parentServer.appendFile("APPEND:"+msg.getMessage(), "/home/ubuntu/REDO.log");		        		
 		        	} catch (IOException e){
 		        		//reply no
 		        		ServerMessage replyNo = new ServerMessage(ServerMessage.TWOPHASE_VOTE_NO, msg.getMessage());
@@ -199,6 +200,7 @@ public abstract class ServerThread extends Thread{
 		        case ServerMessage.TWOPHASE_VOTE_YES:
 		        	parentServer.setPaxosLeaderResponseCount(parentServer.getPaxosLeaderResponseCount() + 1);
 		
+		        	System.out.println("  --YES_RCVD:" + parentServer.getPaxosLeaderResponseCount() + " out of YES_NEEDED: " + this.peerServers.size() );
 		        	
 		        	if (parentServer.getPaxosLeaderResponseCount() == this.peerServers.size()){
 		        		//reset response count for the next query
