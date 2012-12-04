@@ -76,8 +76,7 @@ public abstract class ServerThread extends Thread{
 		        	//read the file (set in child class)
 		        	ServerMessage readResultsMsg = new ServerMessage(ServerMessage.CLIENT_READ, parentServer.readFile(fileName));
 		        	String public_host = "";
-                    
-                        public_host = parentServer.getServerPublicIP();
+                    public_host = parentServer.getServerPublicIP();
               
                     readResultsMsg.setSourceAddress(msg.getSourceAddress());
 		        	sendMessage(public_host, 3003, readResultsMsg);

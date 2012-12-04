@@ -5,7 +5,7 @@ public class StatServerThread extends ServerThread {
 
 	public StatServerThread(Server psrv, Socket skt) {
 		super(psrv, skt);
-		this.fileName = psrv.getProcessId() + "-STATS.txt";
+		this.fileName = "STATS.txt";
 	}
 
 }
