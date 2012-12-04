@@ -203,7 +203,7 @@ public class Server {
     			outfile.createNewFile();
     		}
  
-    	    BufferedWriter buffer = new BufferedWriter( new FileWriter(outfile.getName(),true) );
+    	    BufferedWriter buffer = new BufferedWriter( new FileWriter(outfile,true) );
     	    buffer.write(data + "\n");
             buffer.close(); 
  
