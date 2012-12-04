@@ -225,7 +225,7 @@ public class Server {
 		try{
 			File outfile = new File(filename);
     	    BufferedReader buffer = new BufferedReader( new FileReader(outfile) );    	    
-    	
+    	    System.out.println("Reading Local File: " + filename);
     	    String line = buffer.readLine();
     	    while (line != null ) {
     	    	contents += line + "\n";
@@ -235,7 +235,7 @@ public class Server {
             buffer.close(); 
  
     	}catch(IOException e){
-    		System.out.println("Error Writing Local File:");
+    		System.out.println("Error Reading Local File:");
     		e.printStackTrace();
     	}
 		 return contents;
