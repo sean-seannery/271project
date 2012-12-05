@@ -9,15 +9,21 @@ import java.util.Scanner;
 
 
 public class Client {
+	
+	private static String command;
+	private static int whichStatServer = 0;
+	private static int whichGradeServer = 0;
+	
   public static void main(String[] args) {
-      if (args.length != 1) {
-        System.out.println("need APPEND or READ");
-        System.exit(1);
-      }
-      String grades_host = Server.GRADE_SERVERS.get(0);
-      String stats_host = Server.STAT_SERVERS.get(0);
+
+      
+      processArgs(args);
+      
+      
+      String grades_host = Server.GRADE_SERVERS.get(whichGradeServer);
+      String stats_host = Server.STAT_SERVERS.get(whichStatServer);
       int port = 3000;
-      String command = args[0];
+      
       
       ServerMessage grade_msg = new ServerMessage();
       ServerMessage stat_msg = new ServerMessage();
@@ -177,12 +183,14 @@ public class Client {
 	 * This function handles the arguments being passed to the program from the user.
 	 *  @param args  this is a String array of arguments that get passed to the program.  Should use args from main()
 	 */
-	/*private void processArgs(String[] args){
+	private static void processArgs(String[] args){
 		
-		String usage = "\nUsage: \n java Client APPEND|READ|SERVERINFO [-p portnumber] [-help] \n \n" +
+		
+		String usage = "\nUsage: \n java Client APPEND|READ [-statserver|gradeserver servernumber] [-help] \n \n" +
 					   "APPEND              Will prompt to read in values to save on the server then wait for feedback \n \n" +
 					   "READ                Will return the values of GRADES and STATS from the servers \n \n" +
-					   "-p, -port           The port number this server listens on.  If this option is not provided \n" +
+					   "-statserver,-s num  Specifies the server num correllating to the server list of stat servers \n" +
+					   "-gradeserver,-g num  Specifies the server num correllating to the server list of grade servers \n" +
 					   "                    it will default to listening on port 3000. \n \n" +
 					   "-help               Prints this usage information. \n \n";
 		
@@ -190,26 +198,25 @@ public class Client {
 			System.out.print("Incorrect number of arguments. Exiting Program. \n " + usage);
 			System.exit(1);
 		}
+		
+		command = args[0];
+
 		//process each argument depending on what it is
 		for (int i = 0; i < args.length; i++) {		
 			try{
-				if (args[i].equals("-statserver")) {
-					this.isStatServer = true;
-					this.myPeerServers = Server.STAT_SERVERS;
-					this.myTwoPCCoordinator = Server.STAT_2PC_LEADER;
-				} else if (args[i].equals("-gradeserver")) {
-					this.isGradeServer = true;
-					this.myPeerServers = Server.GRADE_SERVERS;
-					this.myTwoPCCoordinator = Server.GRADE_2PC_LEADER;
-				} else if (args[i].equals("-port") || args[i].equals("-p")) {
-					this.port = Integer.parseInt(args[i+1]);
+				 if (args[i].equals("-statserver") || args[i].equals("-s")) {
+					whichStatServer = Integer.parseInt(args[i+1]);
 					i++;
-				} else if (args[i].equals("-help")) {
+				} else if (args[i].equals("-gradeserver") || args[i].equals("-g")) {
+					whichGradeServer = Integer.parseInt(args[i+1]);
+					i++;
+				}
+				else if (args[i].equals("-help")) {
 					System.out.print(usage);
 					System.exit(0);
 				} 
 			} catch (NumberFormatException e) {
-				System.out.print("Port number must be a valid integer (ex. 3000). Exiting Program. \n ");
+				System.out.print("Grade/Stat server must be a  number Correllating to the server list. Exiting Program. \n ");
 				System.exit(1);
 			} catch (Exception e) {
 				System.out.print("Incorrect number of arguments. Exiting Program. \n " + usage);	
@@ -217,12 +224,8 @@ public class Client {
 			}
 			
 		}
-		//ensure that either -gradeserver or -statserver was specified
-		if (!this.isGradeServer && !this.isStatServer) {
-			System.out.print("You must specify either the -gradeserver or the -statserver option. Exiting Program. \n " + usage);
-			System.exit(1);
-		}
 		
-	}*/
+		
+	}
 }
 
