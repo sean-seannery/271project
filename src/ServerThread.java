@@ -65,58 +65,11 @@ public abstract class ServerThread extends Thread{
 	                	reply(new ServerMessage(ServerMessage.LEADER_RESPONSE, public_host));
 
                 	} else {
-                		ServerMessage ping = new ServerMessage(ServerMessage.HELLO);
-                		if ( sendMessage(parentServer.getPaxosLeaders().get(0), 3000, ping) ) {
-                		   reply(new ServerMessage(ServerMessage.LEADER_RESPONSE, parentServer.getPaxosLeaders().get(0) ));
-                		} else {
-                			//paxos leader has died, elect a new paxos leader
-                	
-		        			//assume one of the servers failed. tell all servers to remove it
-		        			String bad_server = parentServer.getPaxosLeaders().get(0);
-		        			this.peerServers.remove( bad_server  );
-		        			ServerMessage removeServer = new ServerMessage(ServerMessage.REMOVE_SERVER, bad_server);
-		        			ServerMessage leaderElection = new ServerMessage(ServerMessage.PAXOS_ELECTION);
-		        			leaderElection.setBallotNumber(parentServer.getCurrentBallotNumber());
-		        			leaderElection.setBallotProcID(parentServer.getProcessId());
-		        			leaderElection.setSourceAddress(socket.getInetAddress().getHostAddress());
-		        			for (int j = 0; j < this.peerServers.size(); j++){
-		        				if (this.peerServers.get(j) != parentServer.getServerPublicIP()) {					
-			        				sendMessage(this.peerServers.get(j), 3000, removeServer);
-			        				sendMessage(this.peerServers.get(j), 3000, leaderElection);
-		        				}
-		        			}
-		        			
-		        			
-                		}
+                		
+                		reply(new ServerMessage(ServerMessage.LEADER_RESPONSE, parentServer.getPaxosLeaders().get(0) ));
 
                 	}
                 		
-                	break;
-                	
-                case ServerMessage.PAXOS_ELECTION:
-                	
-                	if (msg.getBallotNumber() < parentServer.getCurrentBallotNumber() || (msg.getBallotNumber() == parentServer.getCurrentBallotNumber() && msg.getBallotProcID() < parentServer.getProcessId()) )
-                	{
-                		ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, parentServer.getServerPublicIP(), parentServer.getServerPublicIP());
-                		for (int i = 0; i < this.peerServers.size(); i++){
-	        				if (this.peerServers.get(i) != parentServer.getServerPublicIP()) {					
-	        					sendMessage(this.peerServers.get(i), 3000, leaderMsg);
-	        				}
-	        			}
-                		sendMessage(msg.getSourceAddress(), 3003, new ServerMessage(ServerMessage.LEADER_RESPONSE, parentServer.getServerPublicIP() ));
-                    	
-                	}
-                	else{
-                		ServerMessage leaderMsg = new ServerMessage(ServerMessage.PAXOS_ADD_LEADER, socket.getInetAddress().getHostAddress(), socket.getInetAddress().getHostAddress());
-	            		for (int i = 0; i < this.peerServers.size(); i++){
-	        				if (this.peerServers.get(i) != parentServer.getServerPublicIP()) {					
-	        					sendMessage(this.peerServers.get(i), 3000, leaderMsg);
-	        				}
-	        			}
-	            		sendMessage(msg.getSourceAddress(), 3003, new ServerMessage(ServerMessage.LEADER_RESPONSE, socket.getInetAddress().getHostAddress() ));
-                	}
-                	
-                	
                 	break;
             	    
 		        case ServerMessage.CLIENT_READ:
@@ -233,9 +186,6 @@ public abstract class ServerThread extends Thread{
 		        	 
 		        case ServerMessage.REMOVE_SERVER:
 		        	this.peerServers.remove(msg.getMessage());
-		        	if (parentServer.getPaxosLeaders().get(0) == msg.getMessage()) {
-		        		parentServer.setPaxosLeaders(new ArrayList<String>());
-		        	}
 		        break;
 		        
 		        case ServerMessage.ADD_SERVER:
@@ -247,17 +197,12 @@ public abstract class ServerThread extends Thread{
 		        	// if just added, send the paxos leaders redo logs
 		        	if ( parentServer.isPaxosLeader() ) {
 		        		parentServer.readFile("REDO.log");
-		        		//tell the server that I am the paxos leader and give them logs to catch up
 		        		ServerMessage updateLog = new ServerMessage(ServerMessage.UPDATE_SERVER_REDOLOG, parentServer.readFile("REDO.log") );
-		        		updateLog.setSourceAddress(parentServer.getServerPublicIP());
 		        		sendMessage( msg.getMessage(), 3000, updateLog);
-		        		
 		        	}
 		        break;
 		        
 		        case ServerMessage.UPDATE_SERVER_REDOLOG:
-		        	
-		        	parentServer.addPaxosLeaders(msg.getSourceAddress());
 		        	System.out.println("UPDATING REDO: LOG");
 		        	String file_contents = parentServer.readFile(this.fileName);
 		        	String list[] = msg.getMessage().split("\n");

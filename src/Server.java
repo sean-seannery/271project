@@ -322,10 +322,6 @@ public class Server {
 		return paxosLeaders;
 	}
 
-	public synchronized void setPaxosLeaders(ArrayList<String> paxosLeaders) {
-		this.paxosLeaders = paxosLeaders;
-	}
-
 	public boolean isGradeServer() {
 		return isGradeServer;
 	}
