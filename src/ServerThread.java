@@ -169,11 +169,24 @@ public abstract class ServerThread extends Thread{
 		        		for (int i = 0; i < this.peerServers.size(); i++){
 		        			ServerMessage vote2pc = new ServerMessage(ServerMessage.TWOPHASE_VOTE_REQUEST, acceptVal);
 		        			vote2pc.setSourceAddress(msg.getSourceAddress());
-			        		sendMessage(this.peerServers.get(i), 3000, vote2pc);
+		        			
+			        		boolean success = sendMessage(this.peerServers.get(i), 3000, vote2pc);
+			        		if (!success){
+			        			//assume one of the servers failed. tell all servers to remove it
+			        			String bad_server = this.peerServers.remove(i);
+			        			ServerMessage removeServer = new ServerMessage(ServerMessage.REMOVE_SERVER, bad_server);
+			        			for (int j = 0; j < this.peerServers.size(); j++){
+			        				sendMessage(this.peerServers.get(i), 3000, removeServer);
+			        			}
+			        		}
 		        		}
 		        	}
 		        	
 		        	 break;
+		        	 
+		        case ServerMessage.REMOVE_SERVER:
+		        	this.peerServers.remove(msg.getMessage());
+		        break;
 		        
 		        case ServerMessage.PAXOS_ADD_LEADER:
 		        	if (!parentServer.getPaxosLeaders().contains(msg.getMessage())){
@@ -257,8 +270,9 @@ public abstract class ServerThread extends Thread{
 		
 	}
 	
-	private void sendMessage(String host, int port, ServerMessage msg){
+	private boolean sendMessage(String host, int port, ServerMessage msg){
 		
+		boolean success = false;
 		System.out.println("SENDING " + msg + " to Server:" + host + "...");
 		
 		 try {
@@ -280,9 +294,12 @@ public abstract class ServerThread extends Thread{
 		      
 		      to_server.close();
 		      socket.close();
+		      success = true;
 		 } catch (IOException e){
 			 System.out.println("      ERROR: Server failed sending message:" + e.getMessage());
 		 }
+		 return success;
+		 
 	}
 	
 	private void reply(ServerMessage msg){
