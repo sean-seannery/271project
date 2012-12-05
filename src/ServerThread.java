@@ -199,6 +199,12 @@ public abstract class ServerThread extends Thread{
 		        	if ( parentServer.isPaxosLeader() ) {
 		        		parentServer.readFile("REDO.log");
 		        		ServerMessage updateLog = new ServerMessage(ServerMessage.UPDATE_SERVER_REDOLOG, parentServer.readFile("REDO.log") );
+		        		try {
+							Thread.sleep(750);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 		        		sendMessage( msg.getMessage(), 3000, updateLog);
 		        	}
 		        break;
@@ -295,7 +301,7 @@ public abstract class ServerThread extends Thread{
         catch(ClassNotFoundException ex) {
         	//this shouldnt be a problem, only ServerMessages should be sent.
 			System.exit(1);
-        }
+        } 
 		
        
 		
