@@ -75,8 +75,7 @@ public class Client {
         //only expecting 2 responses
         while (true) {
             
-            Socket connected_socket;
-            connected_socket = socket.accept();
+            Socket connected_socket  = socket.accept();
             ClientThread t = new ClientThread(connected_socket);
             t.run();
             i++;

@@ -275,6 +275,10 @@ public abstract class ServerThread extends Thread{
 		      
 		      to_server.writeObject(msg); to_server.flush();
 		      System.out.println("....SENT");
+		      
+		      
+		      to_server.close();
+		      socket.close();
 		 } catch (IOException e){
 			 System.out.println("      ERROR: Server failed sending message:" + e.getMessage());
 		 }
