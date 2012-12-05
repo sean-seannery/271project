@@ -174,6 +174,7 @@ public abstract class ServerThread extends Thread{
 		        			if (!success){
 			        			//assume one of the servers failed. tell all servers to remove it
 			        			String bad_server = this.peerServers.remove(i);
+			        			i--;
 			        			ServerMessage removeServer = new ServerMessage(ServerMessage.REMOVE_SERVER, bad_server);
 			        			for (int j = 0; j < this.peerServers.size(); j++){
 			        				sendMessage(this.peerServers.get(j), 3000, removeServer);
