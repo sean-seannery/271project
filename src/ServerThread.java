@@ -300,7 +300,7 @@ public abstract class ServerThread extends Thread{
 		
 	}
 	
-	private boolean sendMessage(String host, int port, ServerMessage msg){
+	public boolean sendMessage(String host, int port, ServerMessage msg){
 		
 		boolean success = false;
 		System.out.println("SENDING " + msg + " to Server:" + host + "...");

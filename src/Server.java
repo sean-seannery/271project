@@ -109,12 +109,14 @@ public class Server {
 			System.out.println("Server listening on " + serverPublicIP + ":" + port );
 			System.out.println("================================================");
 			
-			/*System.out.println("Introducing myself to other servers:");
+			System.out.println("Introducing myself to other servers:");
 			ServerMessage add_me = new ServerMessage(ServerMessage.ADD_SERVER, serverPublicIP );
 			for (int i = 0; i < this.getPeerServers().size(); i++) {
-				//using client send message because i dont wanna implement it again
-				Client.sendMessage(this.myPeerServers.get(i), 3000, add_me, false);
-			}*/
+				
+				ServerThread temp = new GradeServerThread(this, null);			
+				
+				temp.sendMessage(this.myPeerServers.get(i), 3000, add_me);
+			}
 					
 			while (!Thread.interrupted()) {
 			
