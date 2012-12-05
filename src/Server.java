@@ -116,7 +116,7 @@ public class Server {
 				Socket tmpSocket = new Socket(this.myPeerServers.get(i) , 3000);
 				System.out.println("Derp");
 				ServerThread temp = new GradeServerThread(this, tmpSocket);			
-				
+				System.out.println("Derp2");
 				temp.sendMessage(this.myPeerServers.get(i), 3000, add_me);
 			}
 					
