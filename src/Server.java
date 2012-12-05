@@ -60,6 +60,7 @@ public class Server {
 	private int currentBallotNumber;	
 	private String acceptValue;
 	private Hashtable<Integer,ArrayList<ServerMessage> > messageHash;
+	private Hashtable<Integer,ArrayList<ServerMessage> > acceptHash;
 	private int currentAcceptNum;  //this containts the last accepted ballot number
 	 //this contains the current value known to this server (what was last accepted)
 	private boolean isPaxosLeader;
@@ -84,6 +85,7 @@ public class Server {
 		isGradeServer = false;
 		isStatServer = false;
 		messageHash = new Hashtable<Integer,ArrayList<ServerMessage> >();
+		acceptHash = new Hashtable<Integer,ArrayList<ServerMessage> >();
 	}
 	
 	/**
@@ -274,6 +276,14 @@ public class Server {
 	}
 	
 	
+	public Hashtable<Integer,ArrayList<ServerMessage> > getAcceptHash() {
+		return acceptHash;
+	}
+
+	public synchronized void setAcceptHash(Hashtable<Integer,ArrayList<ServerMessage> > acceptHash) {
+		this.acceptHash = acceptHash;
+	}
+
 	public int getCurrentBallotNumber() {
 		return currentBallotNumber;
 	}

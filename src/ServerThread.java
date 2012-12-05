@@ -151,18 +151,28 @@ public abstract class ServerThread extends Thread{
         				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, msg.getMessage() ,public_host);
         				acceptMsg.setBallotNumber(parentServer.getCurrentBallotNumber());
         				acceptMsg.setSourceAddress(msg.getSourceAddress());
-        				sendMessage(this.twoPCCoordinator, 3000, acceptMsg);
-		        	
+        				sendMessage(Server.GRADE_2PC_LEADER, 3000, acceptMsg);
+        				sendMessage(Server.STAT_2PC_LEADER, 3000, acceptMsg);
 		        	}
 		        	
 		        	break;
 		        	
 		        case ServerMessage.PAXOS_ACCEPT:
 		        	
-		        	parentServer.setPaxosLeaderResponseCount(parentServer.getPaxosLeaderResponseCount() + 1);
+		        	Hashtable<Integer,ArrayList<ServerMessage> > hash2 = parentServer.getAcceptHash();
+		        	ArrayList<ServerMessage> accept_msgs = hash2.get( msg.getBallotNumber() );
+		            //add the incoming message to a collection of responses for this ballot
+		        	if (accept_msgs == null){
+		        		accept_msgs = new ArrayList<ServerMessage>();
+		        	}
+		        	accept_msgs.add(msg);
+		        	hash2.put(msg.getBallotNumber(), accept_msgs);
+		        	parentServer.setAcceptHash(hash2);
+		        	
+		        	//parentServer.setPaxosLeaderResponseCount(parentServer.getPaxosLeaderResponseCount() + 1);
 		
-		        	System.out.println("  --ACPT_RCVD:" + parentServer.getPaxosLeaderResponseCount() + " out of ACPT_NEEDED: " + parentServer.getPaxosLeaders().size() );
-		        	if (parentServer.getPaxosLeaderResponseCount() == parentServer.getPaxosLeaders().size()){
+		        	System.out.println("  --ACPT_RCVD:" + accept_msgs.size() + " out of ACPT_NEEDED: 2" );
+		        	if (accept_msgs.size() == 2){
 		        		//reset response count for the next query
 		        		parentServer.setPaxosLeaderResponseCount(0);
 		        		String acceptVal = msg.getMessage(); //for tie breakers
