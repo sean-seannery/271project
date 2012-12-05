@@ -112,8 +112,8 @@ public class Server {
 			System.out.println("Introducing myself to other servers:");
 			ServerMessage add_me = new ServerMessage(ServerMessage.ADD_SERVER, serverPublicIP );
 			for (int i = 0; i < this.getPeerServers().size(); i++) {
-				
-				ServerThread temp = new GradeServerThread(this, null);			
+				Socket tmpSocket = new Socket(this.myPeerServers.get(i) , 3000);
+				ServerThread temp = new GradeServerThread(this, tmpSocket);			
 				
 				temp.sendMessage(this.myPeerServers.get(i), 3000, add_me);
 			}
