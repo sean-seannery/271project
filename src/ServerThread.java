@@ -151,8 +151,16 @@ public abstract class ServerThread extends Thread{
         				ServerMessage acceptMsg = new ServerMessage(ServerMessage.PAXOS_ACCEPT, msg.getMessage() ,public_host);
         				acceptMsg.setBallotNumber(parentServer.getCurrentBallotNumber());
         				acceptMsg.setSourceAddress(msg.getSourceAddress());
+        				
+        				if (parentServer.isGradeServer()){        				
         				sendMessage(Server.GRADE_2PC_LEADER, 3000, acceptMsg);
+        				acceptMsg.setMessage(null);
         				sendMessage(Server.STAT_2PC_LEADER, 3000, acceptMsg);
+        				} else if (parentServer.isStatServer()){			
+            				sendMessage(Server.STAT_2PC_LEADER, 3000, acceptMsg);
+            				acceptMsg.setMessage(null);
+            				sendMessage(Server.GRADE_2PC_LEADER, 3000, acceptMsg);
+        				}
 		        	}
 		        	
 		        	break;
@@ -175,7 +183,19 @@ public abstract class ServerThread extends Thread{
 		        	if (accept_msgs.size() == 2){
 		        		//reset response count for the next query
 		        		parentServer.setPaxosLeaderResponseCount(0);
-		        		String acceptVal = msg.getMessage(); //for tie breakers
+		        		String acceptVal = "";
+		        		if (msg.getMessage() == null) {
+		        			for (int i = 0; i < accept_msgs.size(); i++){
+		        				if (accept_msgs.get(i).getMessage() != null) {
+		        					acceptVal = accept_msgs.get(i).getMessage();
+		        				}
+		        			}
+		        		} else {
+		        			 acceptVal = msg.getMessage();
+		        		}
+		        		
+		        		
+		        		 //for tie breakers
 		        		for (int i = 0; i < this.peerServers.size(); i++){
 		        			ServerMessage vote2pc = new ServerMessage(ServerMessage.TWOPHASE_VOTE_REQUEST, acceptVal);
 		        			vote2pc.setSourceAddress(msg.getSourceAddress());
