@@ -46,8 +46,8 @@ public class Server {
        put("ip-10-226-118-242.eu-west-1.compute.internal",     "ec2-79-125-51-183.eu-west-1.compute.amazonaws.com");     
        put("ip-10-202-151-203.ec2.internal",                   "ec2-54-234-21-221.compute-1.amazonaws.com");     
        put("ip-10-244-29-215.us-west-2.compute.internal",      "ec2-50-112-47-84.us-west-2.compute.amazonaws.com");  }};        */       
-	public static final String STAT_2PC_LEADER = "ec2-107-21-67-13.compute-1.amazonaws.com";
-	public static final String GRADE_2PC_LEADER = "ec2-54-234-21-221.compute-1.amazonaws.com";
+	public static final String STAT_2PC_LEADER = "107.21.67.13";
+	public static final String GRADE_2PC_LEADER = "54.234.21.221";
 	private String serverPublicIP;
 
 	private int port;
@@ -109,12 +109,12 @@ public class Server {
 			System.out.println("Server listening on " + serverPublicIP + ":" + port );
 			System.out.println("================================================");
 			
-			System.out.println("Introducing myself to other servers:");
+			/*System.out.println("Introducing myself to other servers:");
 			ServerMessage add_me = new ServerMessage(ServerMessage.ADD_SERVER, serverPublicIP );
 			for (int i = 0; i < this.getPeerServers().size(); i++) {
 				//using client send message because i dont wanna implement it again
 				Client.sendMessage(this.myPeerServers.get(i), 3000, add_me, false);
-			}
+			}*/
 					
 			while (!Thread.interrupted()) {
 			
