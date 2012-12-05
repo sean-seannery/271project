@@ -74,15 +74,8 @@ public abstract class ServerThread extends Thread{
             	    
 		        case ServerMessage.CLIENT_READ:
 		        	//read the file (set in child class)
-		        	if (parentServer.isStatServer()){
-		        		try {
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-		        	}
 		        	ServerMessage readResultsMsg = new ServerMessage(ServerMessage.CLIENT_READ, parentServer.readFile(fileName));
-                    sendMessage(msg.getSourceAddress(), 3003, readResultsMsg);
+                    reply( readResultsMsg);
 		        	
 		        	break;
 		        case ServerMessage.CLIENT_APPEND:

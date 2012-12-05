@@ -49,6 +49,9 @@ public class Client {
         stat_msg.setMessage(statsString);
       }
       
+      
+      
+      
     //initiate contact with a grade server and get back the grade paxos leader
       ServerMessage line = sendMessage(grades_host,port,prepare, true);
       if(line != null) {
@@ -63,28 +66,43 @@ public class Client {
           System.out.println("STATS PAXOS LEADER IS: " + stats_host);     
         }
       
+      if (command.equals("APPEND")) {
       //send the grades and stats to their appropriate paxos leaders
       sendMessage(grades_host,port,grade_msg, false);     
       sendMessage(stats_host,port,stat_msg, false);
       
-       //listen on port 3003 for results of read or append.
-    try {
-        ServerSocket socket = new ServerSocket(3003);
-        
-        int i = 0;
-        //only expecting 2 responses
-        while (true) {
-            
-            
-            ClientThread t = new ClientThread(socket.accept());
-            t.run();
-            i++;
-                          
-        }
-    }
-    catch (Exception e) {    // report any exceptions
-      System.err.println(e);
-    }
+      //listen on port 3003 for results of read or append.
+      try {
+          ServerSocket socket = new ServerSocket(3003);
+          
+          int i = 0;
+          //only expecting 2 responses
+          while (true) {
+              
+              
+              ClientThread t = new ClientThread(socket.accept());
+              t.run();
+              i++;
+                            
+          }
+      }
+      catch (Exception e) {    // report any exceptions
+        System.err.println(e);
+      }
+      
+      }
+      else if (command.equals("READ")){
+    	//initiate contact with a grade server and get back the grade paxos leader
+          ServerMessage readresults = sendMessage(grades_host,port,grade_msg, true);
+          if(readresults != null) {
+              System.out.println("READING:" + readresults.getMessage());     
+            }
+          readresults = sendMessage(stats_host,port,stat_msg, true);
+          if(readresults != null) {
+        	  System.out.println("READING:" + readresults.getMessage());  
+            }
+      }
+    
 
   }
   
