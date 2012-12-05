@@ -23,12 +23,22 @@ import java.util.UUID;
  */
 public class Server {
 	
-	public static final ArrayList<String> STAT_SERVERS = new ArrayList<String>(Arrays.asList("ec2-54-246-64-97.eu-west-1.compute.amazonaws.com", 
-																							"ec2-107-21-67-13.compute-1.amazonaws.com",
-																							"ec2-54-245-146-112.us-west-2.compute.amazonaws.com"));
-	public static final ArrayList<String> GRADE_SERVERS = new ArrayList<String>(Arrays.asList("ec2-79-125-51-183.eu-west-1.compute.amazonaws.com",
-																							"ec2-54-234-21-221.compute-1.amazonaws.com",
-																							"ec2-50-112-47-84.us-west-2.compute.amazonaws.com"));
+	// initial server list                                                 Public IP         Private IP
+	// Stat Servers
+	// 0	ec2-54-246-64-97.eu-west-1.compute.amazonaws.com      54.246.64.97      10.227.198.52
+	// 1    ec2-107-21-67-13.compute-1.amazonaws.com		      107.21.67.13      10.72.239.40
+	// 2    ec2-54-245-146-112.us-west-2.compute.amazonaws.com    54.245.146.112    10.244.142.175
+	// Grade Servers
+	// 0    ec2-79-125-51-183.eu-west-1.compute.amazonaws.com     79.125.51.183     10.226.118.242
+	// 1	ec2-54-234-21-221.compute-1.amazonaws.com             54.234.21.221     10.202.151.203
+	// 2	ec2-50-112-47-84.us-west-2.compute.amazonaws.com      50.112.47.84      10.244.29.215
+	
+	public static final ArrayList<String> STAT_SERVERS = new ArrayList<String>(Arrays.asList("54.246.64.97", 
+																							"107.21.67.13",
+																							"54.245.146.112"));
+	public static final ArrayList<String> GRADE_SERVERS = new ArrayList<String>(Arrays.asList("79.125.51.183",
+																							  "54.234.21.221",
+																							  "50.112.47.84"));
    /* private static final Hashtable<String,String> PRIVATE_TO_PUBLIC = new Hashtable<String,String>() 
     {{ put("ip-10-227-198-52.eu-west-1.compute.internal",      "ec2-54-246-64-97.eu-west-1.compute.amazonaws.com");     
        put("ip-10-72-239-40.ec2.internal",                     "ec2-107-21-67-13.compute-1.amazonaws.com");     
@@ -97,7 +107,14 @@ public class Server {
 			this.socket = new ServerSocket(this.port);
 			
 			System.out.println("Server listening on " + serverPublicIP + ":" + port );
-			System.out.println("=============================================");
+			System.out.println("================================================");
+			
+			System.out.println("Introducing myself to other servers:");
+			ServerMessage add_me = new ServerMessage(ServerMessage.ADD_SERVER, serverPublicIP );
+			for (int i = 0; i < this.getPeerServers().size(); i++) {
+				//using client send message because i dont wanna implement it again
+				Client.sendMessage(this.myPeerServers.get(i), 3000, add_me, false);
+			}
 					
 			while (!Thread.interrupted()) {
 			

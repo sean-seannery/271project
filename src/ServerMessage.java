@@ -25,6 +25,8 @@ public class ServerMessage implements Serializable {
 	static final int LEADER_RESPONSE = 23;
 	//failure recovery
 	static final int REMOVE_SERVER = 30;
+	static final int ADD_SERVER = 31;
+	static final int UPDATE_SERVER_REDOLOG = 32;
 	
 	private int type;
 	private String msg;
@@ -116,6 +118,9 @@ public class ServerMessage implements Serializable {
 		typemapping.put(22, "CLIENT_GET_LEADER");
 		typemapping.put(23, "LEADER_RESPONSE");
 		typemapping.put(30, "REMOVE_SERVER");
+		typemapping.put(31, "ADD_SERVER");
+		typemapping.put(32, "UPDATE_SERVER_REDOLOG");
+
 
 	
 		if (this.type == -1) {

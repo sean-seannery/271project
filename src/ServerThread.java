@@ -188,6 +188,36 @@ public abstract class ServerThread extends Thread{
 		        	this.peerServers.remove(msg.getMessage());
 		        break;
 		        
+		        case ServerMessage.ADD_SERVER:
+		        	if ( ! parentServer.getPeerServers().contains( msg.getMessage() ) ) {
+		        		ArrayList <String> temp = parentServer.getPeerServers();
+		        		temp.add(msg.getMessage());
+		        		parentServer.setPeerServers(temp);
+		        	}
+		        	// if just added, send the paxos leaders redo logs
+		        	if ( parentServer.isPaxosLeader() ) {
+		        		parentServer.readFile("REDO.log");
+		        		ServerMessage updateLog = new ServerMessage(ServerMessage.UPDATE_SERVER_REDOLOG, parentServer.readFile("REDO.log") );
+		        		sendMessage( msg.getMessage(), 3000, updateLog);
+		        	}
+		        break;
+		        
+		        case ServerMessage.UPDATE_SERVER_REDOLOG:
+		        	System.out.println("UPDATING REDO: LOG");
+		        	String file_contents = parentServer.readFile(this.fileName);
+		        	String list[] = msg.getMessage().split("\n");
+		        	for (int i = 0; i < list.length; i++){
+		        		String tmp = list[i].replace("APPEND:", "").trim();
+		        		if (! file_contents.contains(tmp) ){
+		        			parentServer.appendFile(tmp, this.fileName);
+		        			
+		        		}
+		        	}
+		        		
+		        	
+		        	
+		        break;
+		        
 		        case ServerMessage.PAXOS_ADD_LEADER:
 		        	if (!parentServer.getPaxosLeaders().contains(msg.getMessage())){
 		        	    parentServer.addPaxosLeaders(msg.getMessage());
