@@ -264,10 +264,10 @@ public abstract class ServerThread extends Thread{
 		 try {
 		      InetAddress address = InetAddress.getByName(host);
 		      System.out.print("      Connecting to Server:"+host+"...");
-		      
+		      System.out.println("address:" + address.getHostAddress() + " port: " + port);
 		      // open socket, then input and output streams to it
 		      Socket socket = new Socket(address,port);
-		      System.out.println("address:" + address.getHostAddress() + " port: " + port + ""+ socket.toString());
+		      
 		      ObjectOutputStream to_server = new ObjectOutputStream(socket.getOutputStream());
 		      System.out.print("Connected");
 		      
