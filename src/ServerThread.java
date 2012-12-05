@@ -31,6 +31,7 @@ public abstract class ServerThread extends Thread{
         	outputStream = new ObjectOutputStream(socket.getOutputStream()); //needs this or it wont work
         	System.out.println("Dasdfasdfasdfasdferp");
             inputStream  = new ObjectInputStream(socket.getInputStream());
+            System.out.println("stuff");
         }
         catch (IOException e) {
             System.out.println("Error Creating Streams: " + e);
