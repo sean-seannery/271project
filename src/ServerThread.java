@@ -267,6 +267,7 @@ public abstract class ServerThread extends Thread{
 		      
 		      // open socket, then input and output streams to it
 		      Socket socket = new Socket(address,port);
+		      System.out.println("address:" + address.getHostAddress() + " port: " + port + ""+ socket.toString());
 		      ObjectOutputStream to_server = new ObjectOutputStream(socket.getOutputStream());
 		      System.out.print("Connected");
 		      
