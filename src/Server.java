@@ -113,11 +113,11 @@ public class Server {
 			ServerMessage add_me = new ServerMessage(ServerMessage.ADD_SERVER, serverPublicIP );
 			
 			for (int i = 0; i < this.getPeerServers().size(); i++) {
-				Socket tmpSocket = new Socket(this.myPeerServers.get(i) , 3000);
+				//Socket tmpSocket = new Socket(this.myPeerServers.get(i) , 3000);
 				System.out.println("Derp");
-				ServerThread temp = new GradeServerThread(this, tmpSocket);			
+				//ServerThread temp = new GradeServerThread(this, tmpSocket);			
 				System.out.println("Derp2");
-				temp.sendMessage(this.myPeerServers.get(i), 3000, add_me);
+				Client.sendMessage(this.myPeerServers.get(i), 3000, add_me,false);
 			}
 					
 			while (!Thread.interrupted()) {
