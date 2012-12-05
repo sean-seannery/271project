@@ -12,6 +12,7 @@ public class ServerMessage implements Serializable {
 	static final int PAXOS_ACK = 1;
 	static final int PAXOS_ACCEPT = 2;
 	static final int PAXOS_ADD_LEADER = 3;
+	static final int PAXOS_ELECTION = 4;
 	//two phase commit message types
 	static final int TWOPHASE_VOTE_REQUEST = 10;
 	static final int TWOPHASE_VOTE_YES = 11;
@@ -27,6 +28,7 @@ public class ServerMessage implements Serializable {
 	static final int REMOVE_SERVER = 30;
 	static final int ADD_SERVER = 31;
 	static final int UPDATE_SERVER_REDOLOG = 32;
+	static final int HELLO = 33;
 	
 	private int type;
 	private String msg;
@@ -120,6 +122,8 @@ public class ServerMessage implements Serializable {
 		typemapping.put(30, "REMOVE_SERVER");
 		typemapping.put(31, "ADD_SERVER");
 		typemapping.put(32, "UPDATE_SERVER_REDOLOG");
+		typemapping.put(33, "HELLO");
+		typemapping.put(4, "PAXOS_ELECTION");
 
 
 	
