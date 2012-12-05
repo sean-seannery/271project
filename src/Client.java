@@ -119,13 +119,10 @@ public class Client {
 	      System.out.print("Connecting to " + host_addr + "...");
 	      
 	      // open socket, then input and output streams to it
-	      System.out.println("hello0");
+
 	      Socket socket = new Socket(address, port);
-	      System.out.println("hello1");
 	      ObjectInputStream from_server = new ObjectInputStream(socket.getInputStream());
-	      System.out.println("hello2");
 	      ObjectOutputStream to_server = new ObjectOutputStream(socket.getOutputStream());
-	      System.out.println("hello3");
 	      System.out.println("Connected");
 	      
 	      // send command to server, then read and print lines until

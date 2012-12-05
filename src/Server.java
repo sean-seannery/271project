@@ -105,12 +105,9 @@ public class Server {
 		
 	    try {
 	    	ServerMessage add_me = new ServerMessage(ServerMessage.ADD_SERVER, serverPublicIP );
-			
-			for (int i = 0; i < this.getPeerServers().size(); i++) {
-				//Socket tmpSocket = new Socket(this.myPeerServers.get(i) , 3000);
-				System.out.println("Derp");
-				//ServerThread temp = new GradeServerThread(this, tmpSocket);			
-				System.out.println("Derp2");
+	    	
+	    	System.out.println("Introducing myself to other servers:");
+			for (int i = 0; i < this.getPeerServers().size(); i++) {	
 				Client.sendMessage(this.myPeerServers.get(i), 3000, add_me,false);
 			}
 	    	
@@ -120,7 +117,7 @@ public class Server {
 			System.out.println("Server listening on " + serverPublicIP + ":" + port );
 			System.out.println("================================================");
 			
-			System.out.println("Introducing myself to other servers:");
+			
 			
 					
 			while (!Thread.interrupted()) {

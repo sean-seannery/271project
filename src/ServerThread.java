@@ -27,11 +27,8 @@ public abstract class ServerThread extends Thread{
         try
         {
             // create output first
-        	System.out.println("asdfasdfasdf");
         	outputStream = new ObjectOutputStream(socket.getOutputStream()); //needs this or it wont work
-        	System.out.println("Dasdfasdfasdfasdferp");
             inputStream  = new ObjectInputStream(socket.getInputStream());
-            System.out.println("stuff");
         }
         catch (IOException e) {
             System.out.println("Error Creating Streams: " + e);
@@ -309,7 +306,6 @@ public abstract class ServerThread extends Thread{
 		System.out.println("SENDING " + msg + " to Server:" + host + "...");
 		
 		 try {
-			 System.out.println("Derp");
 		      InetAddress address = InetAddress.getByName(host);
 		      System.out.print("      Connecting to Server:"+host+"...");
 		      System.out.println("address:" + address.getHostAddress() + " port: " + port);
