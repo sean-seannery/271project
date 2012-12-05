@@ -83,7 +83,7 @@ public class Client {
           
           int i = 0;
           //only expecting 2 responses
-          while (true) {
+          while (i < 2) {
               
               
               ClientThread t = new ClientThread(socket.accept());
