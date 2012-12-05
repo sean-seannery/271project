@@ -169,14 +169,14 @@ public abstract class ServerThread extends Thread{
 		        		for (int i = 0; i < this.peerServers.size(); i++){
 		        			ServerMessage vote2pc = new ServerMessage(ServerMessage.TWOPHASE_VOTE_REQUEST, acceptVal);
 		        			vote2pc.setSourceAddress(msg.getSourceAddress());
-		        			
-			        		boolean success = sendMessage(this.peerServers.get(i), 3000, vote2pc);
-			        		if (!success){
+		        			boolean success = sendMessage(this.peerServers.get(i), 3000, vote2pc);
+			        		
+		        			if (!success){
 			        			//assume one of the servers failed. tell all servers to remove it
 			        			String bad_server = this.peerServers.remove(i);
 			        			ServerMessage removeServer = new ServerMessage(ServerMessage.REMOVE_SERVER, bad_server);
 			        			for (int j = 0; j < this.peerServers.size(); j++){
-			        				sendMessage(this.peerServers.get(i), 3000, removeServer);
+			        				sendMessage(this.peerServers.get(j), 3000, removeServer);
 			        			}
 			        		}
 		        		}
